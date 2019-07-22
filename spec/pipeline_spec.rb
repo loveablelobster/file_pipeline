@@ -117,6 +117,21 @@ module FilePipeline
       end
     end
 
+    describe '#empty?' do
+      subject { pipeline.empty? }
+
+      context 'when no operations have been added' do
+        it { is_expected.to be_truthy }
+      end
+
+      context 'wen operation have been added' do
+        before { pipeline << FileOperations::Scale.new }
+
+        it { is_expected.to be_falsey }
+      end
+    end
+
+
     describe '#run(operation, versioned_file)' do
       subject :scale do
         pipeline.run(pipeline.file_operations[0], vfile1)

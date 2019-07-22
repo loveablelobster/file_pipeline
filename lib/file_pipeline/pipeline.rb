@@ -26,6 +26,7 @@ module FilePipeline
     end
 
     # Applies all #file_operations to one or more VersionedFile instances.
+    # TODO: try using threads
     def batch_apply(*versioned_files)
       versioned_files.map { |file| apply_to(file) }
     end
@@ -44,6 +45,10 @@ module FilePipeline
       operation = FilePipeline.load file_operation
       self << operation.new(options)
       self
+    end
+
+    def empty?
+      file_operations.empty?
     end
 
     # Applies _operation_ (a file operation object implementing the #run
