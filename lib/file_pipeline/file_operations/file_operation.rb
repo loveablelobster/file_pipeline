@@ -20,6 +20,15 @@ module FilePipeline
         @options = defaults.merge(opts)
       end
 
+      # Stores _e_ (an error) in <em>log_data</em>.
+      def self.store_error(e, log_data)
+        normalized = Results.parse_log_data(log_data)
+        return [e] unless normalized
+
+        normalized.first ? normalized.first << e : normalized[0] = [e]
+        normalized
+      end
+
       # Returns a Description Struct with the class name of _self_ and
       # #options.
       def description
@@ -58,9 +67,10 @@ module FilePipeline
         out_file = target directory_path, extension(src_file)
         log_data = operation src_file, out_file
         [out_file, success(log_data)]
-      rescue => error
-        log ||= error.message
-        [out_file, failure(log_data)]
+      rescue => e
+        log_data = FileOperation.store_error e, log_data
+        FileUtils.rm out_file if File.exist? out_file
+        [out_file, failure(e)]
       end
 
       # Returns a Results Struct with the _success_ attribute set to +true+,

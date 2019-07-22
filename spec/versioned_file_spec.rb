@@ -13,7 +13,7 @@ module FilePipeline
 
     let(:converter) { FileOperations::PtiffConversion.new }
     let(:exif) { FileOperations::ExifRestoration.new }
-    let(:tags) { FileOperations::ExifRestoration::FILE_TAGS }
+    let(:tags) { FileOperations::ExifManipulable.file_tags }
 
     let :versioned_file do
       described_class.new 'spec/support/example1.jpg',
