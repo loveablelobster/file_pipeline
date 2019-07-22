@@ -32,6 +32,25 @@ module FilePipeline
       end
     end
 
+    context 'when initialized with a block' do
+      subject :pipeline_with_ops do
+        described_class.new do |ppln|
+          ppln.define_operation('scale', width: 1280, height: 1280)
+        end
+      end
+
+      let :expected_ops do
+        include a_kind_of(FileOperations::FileOperation) &
+          have_attributes(options: { width: 1280, height: 1280,
+                                     method: :scale_by_bounds })
+      end
+
+      it do
+        expect(pipeline_with_ops)
+          .to have_attributes file_operations: expected_ops
+      end
+    end
+
     describe '<<(file_operation_instance)' do
       subject(:add_scale_operation) { pipeline << FileOperations::Scale.new }
 

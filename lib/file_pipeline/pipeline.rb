@@ -8,7 +8,7 @@ module FilePipeline
     def initialize(*src_directories)
       src_directories.each { |dir| FilePipeline << dir }
       @file_operations = []
-      yield_self if block_given?
+      yield(self) if block_given?
     end
 
     # Adds a file operation object implementing a #run method to
