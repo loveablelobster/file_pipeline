@@ -148,6 +148,20 @@ module FilePipeline
       end
     end
 
+    describe '#changed?' do
+      subject { versioned_file.changed? }
+
+      context 'when it has been changed' do
+        before { versioned_file.touch }
+
+        it { is_expected.to be_truthy }
+      end
+
+      context 'when it has not been changed' do
+        it { is_expected.to be_falsey }
+      end
+    end
+
     describe '#clone' do
       subject(:clone) { versioned_file.clone }
 

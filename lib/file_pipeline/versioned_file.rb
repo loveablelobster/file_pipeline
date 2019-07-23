@@ -101,6 +101,12 @@ module FilePipeline
       raw_data.map(&:last)
     end
 
+    # Returns +true+ if the file has been modified by operations. It will also
+    # return +true+ if the file has been cloned.
+    def changed?
+      current != original
+    end
+
     # Returns the final version as basename + final extension, calls #destroy
     # use a finalizer? #define_finalizer
     def finalize(overwrite: false)
@@ -136,6 +142,8 @@ module FilePipeline
     def versions
       history.keys
     end
+
+    alias touch clone
 
     private
 
