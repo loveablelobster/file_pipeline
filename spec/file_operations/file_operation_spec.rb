@@ -32,7 +32,7 @@ module FilePipeline
         context 'when passed errors' do
           let(:log_data) { log }
 
-          it { is_expected.to match_array [exp_log]}
+          it { is_expected.to match_array [exp_log] }
         end
 
         context 'when passed an error message' do

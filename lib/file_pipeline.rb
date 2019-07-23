@@ -12,6 +12,9 @@ require_relative 'file_pipeline/pipeline'
 # == Usage:
 # TODO: proper documentation for usage
 module FilePipeline
+  # Constant for the defualt directory for file operations.
+  DEFAULT_DIR = 'file_pipeline/file_operations/default_operations'
+
   # Adds _directory_ to the Array of #source_directories which will be
   # searched for source files when loading file operations.
   # _directory_ will be prepended. Therefore, directories will be searcherd
@@ -32,7 +35,7 @@ module FilePipeline
     const = file_operation.split('_').map(&:capitalize).join
     FilePipeline.load_file(file_operation) unless const_defined? const
     const_get 'FileOperations::' + const
-  rescue NameError => e
+  rescue NameError
     # TODO: implement autogenerating module names from file_operation src path
     const_get const
   end
@@ -72,7 +75,7 @@ module FilePipeline
   def self.source_directories
     return @src_directories if @src_directories
 
-    @src_directories = [FilePipeline.path(__dir__, 'file_pipeline/file_operations/default_operations')]
+    @src_directories = [FilePipeline.path(__dir__, DEFAULT_DIR)]
   end
 
   # Searches .source_directories and for _file_, and returns the full path
@@ -89,4 +92,3 @@ module FilePipeline
     nil
   end
 end
-

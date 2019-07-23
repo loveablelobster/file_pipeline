@@ -6,7 +6,7 @@ require_relative '../../../lib/file_pipeline/file_operations'\
 module FilePipeline
   module FileOperations
     RSpec.describe PtiffConversion do
-      include_context 'shared variables'
+      include_context 'with variables'
 
       subject :pyramid do
         described_class

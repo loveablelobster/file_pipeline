@@ -8,7 +8,7 @@ require_relative '../../../lib/file_pipeline/file_operations'\
 module FilePipeline
   module FileOperations
     RSpec.describe ExifRestoration do
-      include_context 'shared variables'
+      include_context 'with variables'
 
       subject :restored do
         described_class.new(skip_tags: %w[JFIFVersion])
@@ -32,7 +32,7 @@ module FilePipeline
 
       it do
         out_exif = lambda do |out_file|
-          result, _ = MultiExiftool.read out_file
+          result, = MultiExiftool.read out_file
           result.first
         end
         expect(out_exif.call(restored)).to include 'Model' => 'PEN-F'

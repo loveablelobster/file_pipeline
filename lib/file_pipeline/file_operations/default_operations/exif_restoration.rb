@@ -30,9 +30,7 @@ module FilePipeline
         out_file = target directory_path, extension(src_file)
         log_data = operation src_file, out_file, values
         [out_file, success(log_data)]
-      rescue => e
-        puts e.message
-        puts e.backtrace
+      rescue StandardError => e
         log_data.first << e
         FileUtils.rm out_file if File.exist? out_file
         [out_file, failure(log_data)]

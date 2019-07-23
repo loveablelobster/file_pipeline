@@ -3,11 +3,11 @@
 module FilePipeline
   module FileOperations
     RSpec.describe Results do
+      subject(:new_instance) { described_class.new description, true, log_data }
+
       let(:description) { 'an operation' }
       let(:log) { %w[error anothererror yetanotherone] }
       let(:data) { { a: 1, b: 2, c: 3 } }
-
-      subject(:new_instance) { described_class.new description, true, log_data }
 
       context 'when passed log and data with data first' do
         let(:log_data) { [data, log] }

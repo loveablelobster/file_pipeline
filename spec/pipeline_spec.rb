@@ -5,7 +5,7 @@ require_relative '../lib/file_pipeline/file_operations'\
 
 module FilePipeline
   RSpec.describe Pipeline do
-    include_context 'shared variables'
+    include_context 'with variables'
 
     let(:logo) { 'spec/support/logo.png' }
     let(:pipeline) { described_class.new test_ops }
@@ -41,8 +41,8 @@ module FilePipeline
 
       let :expected_ops do
         include a_kind_of(FileOperations::FileOperation) &
-          have_attributes(options: { width: 1280, height: 1280,
-                                     method: :scale_by_bounds })
+                have_attributes(options: { width: 1280, height: 1280,
+                                           method: :scale_by_bounds })
       end
 
       it do
@@ -77,7 +77,7 @@ module FilePipeline
         subject(:apply) { pipeline.apply_to(vfile1) }
 
         it do
-          expect { apply }.to change { vfile1.versions }
+          expect { apply }.to change(vfile1, :versions)
             .from(be_empty).to versions1
         end
 
@@ -112,9 +112,9 @@ module FilePipeline
         it { is_expected.to match_array expected_results }
 
         it do
-          expect { batch }.to change { vfile1.versions }
+          expect { batch }.to change(vfile1, :versions)
             .from(be_empty).to(versions1)
-            .and change { vfile2.versions }.from(be_empty).to versions2
+            .and change(vfile2, :versions).from(be_empty).to versions2
         end
       end
     end
@@ -143,13 +143,12 @@ module FilePipeline
         it { is_expected.to be_truthy }
       end
 
-      context 'wen operation have been added' do
+      context 'when operation have been added' do
         before { pipeline << FileOperations::Scale.new }
 
         it { is_expected.to be_falsey }
       end
     end
-
 
     describe '#run(operation, versioned_file)' do
       subject :scale do

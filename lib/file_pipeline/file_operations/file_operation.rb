@@ -21,11 +21,11 @@ module FilePipeline
       end
 
       # Stores _e_ (an error) in <em>log_data</em>.
-      def self.store_error(e, log_data)
+      def self.store_error(error, log_data)
         normalized = Results.parse_log_data(log_data)
-        return [e] unless normalized
+        return [error] unless normalized
 
-        normalized.first ? normalized.first << e : normalized[0] = [e]
+        normalized.first ? normalized.first << error : normalized[0] = [error]
         normalized
       end
 
@@ -67,10 +67,10 @@ module FilePipeline
         out_file = target directory_path, extension(src_file)
         log_data = operation src_file, out_file
         [out_file, success(log_data)]
-      rescue => e
+      rescue StandardError => e
         log_data = FileOperation.store_error e, log_data
         FileUtils.rm out_file if File.exist? out_file
-        [out_file, failure(e)]
+        [out_file, failure(log_data)]
       end
 
       # Returns a Results Struct with the _success_ attribute set to +true+,

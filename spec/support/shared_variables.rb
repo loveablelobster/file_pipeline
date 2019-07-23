@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.shared_context 'shared variables', :shared_context => :metadata do
-
+RSpec.shared_context 'with variables', shared_context: :metadata do
   # Directories
   let :default_ops do
     File.expand_path 'lib/file_pipeline/file_operations/default_operations'
@@ -16,6 +15,7 @@ RSpec.shared_context 'shared variables', :shared_context => :metadata do
   let(:src_file2) { File.expand_path 'spec/support/example2.tif' }
   let(:src_file_ptiff) { 'spec/support/pyramid.tiff' }
 
+  # Other
   let :non_writable_tags do
     include 'EncodingProcess' => 'Baseline DCT, Huffman coding',
             'ColorComponents' => 3,

@@ -9,7 +9,7 @@ require_relative '../lib/file_pipeline/file_operations'\
 
 module FilePipeline
   RSpec.describe VersionedFile do
-    include_context 'shared variables'
+    include_context 'with variables'
 
     let(:converter) { FileOperations::PtiffConversion.new }
     let(:exif) { FileOperations::ExifRestoration.new }
@@ -31,7 +31,7 @@ module FilePipeline
         subject(:add_failure) { versioned_file << [nil, broken_results] }
 
         let :broken_results do
-          info = OpenStruct.new(name: 'Kaputt', options: { cannot_work: true } )
+          info = OpenStruct.new(name: 'Kaputt', options: { cannot_work: true })
           FileOperations::Results.new info, false, 'Error: Something went wrong'
         end
 
@@ -135,7 +135,7 @@ module FilePipeline
         subject(:log) { versioned_file.log }
 
         let :warning do
-          msg = "Warning: [Minor] Unrecognized data in IPTC padding"
+          msg = 'Warning: [Minor] Unrecognized data in IPTC padding'
           a_collection_including msg
         end
 

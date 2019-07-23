@@ -4,6 +4,10 @@ require 'ruby-vips'
 
 module FilePipeline
   module FileOperations
+    # Saves a file to a tiled multi-resolution TIFF, as required by the IIP
+    # image server.
+    # See https://iipimage.sourceforge.io/documentation/images/ or
+    # https://www.loc.gov/preservation/digital/formats/fdd/fdd000237.shtml
     class PtiffConversion < FileOperation
       # Returns a new instance.
       # _opts_:
