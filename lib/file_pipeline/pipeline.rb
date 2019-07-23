@@ -25,9 +25,9 @@ module FilePipeline
       versioned_file
     end
 
-    # Applies all #file_operations to one or more VersionedFile instances.
+    # Applies all #file_operations to an Array of VersionedFile instances.
     # TODO: try using threads
-    def batch_apply(*versioned_files)
+    def batch_apply(versioned_files)
       versioned_files.map { |file| apply_to(file) }
     end
 

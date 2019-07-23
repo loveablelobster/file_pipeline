@@ -91,7 +91,7 @@ module FilePipeline
       end
 
       describe '#batch_apply(*versioned_files)' do
-        subject(:batch) { pipeline.batch_apply(vfile1, vfile2) }
+        subject(:batch) { pipeline.batch_apply [vfile1, vfile2] }
 
         let(:vfile2) { VersionedFile.new src_file2 }
 
