@@ -3,24 +3,25 @@
 module FilePipeline
   # VersionedFile creates a directory where it stores any versions of _file_.
   class VersionedFile
-    # Copies the _src_ file to <em>/directory/filename<em>.
+    # Copies the file with path _src_ to <em>/dir/filename</em>.
     def self.copy(src, dir, filename)
       dest = FilePipeline.path(dir, filename)
       FileUtils.cp src, dest
       dest
     end
 
-    # Moves the _src_ file to <em>/directory/filename<em>.
+    # Moves the file with path _src_ to <em>/dir/filename</em>.
     def self.move(src, dir, filename)
       dest = FilePipeline.path(dir, filename)
       FileUtils.mv src, dest
       dest
     end
 
-    # The basename of the versioned file
+    # The basename of the versioned file.
     attr_reader :basename
 
-    # A Hash with file paths (String) as keys, VersionInfo as values.
+    # A hash with file paths as keys, information on the modifications applied
+    # to create the version as values (instances of FileOperations::Results).
     attr_reader :history
 
     # The path to the original file of _self_.
@@ -30,8 +31,8 @@ module FilePipeline
     # by #finalize is not replacing the original.
     attr_reader :target_suffix
 
-    # Returns a new instance for _file_.
-    # <em>target_suffix</em> is a String to be appended to the file that
+    # Returns a new instance with _file_ as the #original.
+    # <em>target_suffix</em> is a string to be appended to the file that
     # will be written by #finalize (the last version) if #finalize is to
     # preserve the original. It is recommended to use a UUID to avoid clashes
     # with other files in the directory.
@@ -43,11 +44,14 @@ module FilePipeline
       @target_suffix = target_suffix
     end
 
-    # Adds _file_ to #versions if validation passes, moves the file to
-    # #directory if it is in another directory.
-    # Returns _self_.
-    def <<(result_array)
-      file, info = result_array
+    # Adds a new version to #history and returns _self_.
+    #
+    # <em>version_info</em> must be a path to an existing file or an array with
+    # the path and optionally a FileOperations::Results instance:
+    # <tt>['path/to/file', results_object]</tt>.
+    # Will move the file to #directory if it is in another directory.
+    def <<(version_info)
+      file, info = version_info
       raise Errors::FailedModificationError, info: info if info&.failure
 
       version = validate(file)
@@ -58,41 +62,20 @@ module FilePipeline
       raise e
     end
 
-    # Creates a new identical version of current. Will only add the path of
-    # the file to history, but no information (value will be nil).
-    def clone
-      filename = FilePipeline.new_basename + current_extension
-      clone_file = VersionedFile.copy(current, directory, filename)
-      self << clone_file
-    end
-
-    # Returns a String with the path to the current file.
-    # Returns the path to the original if no versions have been created
-    # through #clone or #modify.
-    def current
-      versions.last || original
-    end
-
-    # Returns the fle extension for the #current file.
-    def current_extension
-      File.extname current
-    end
-
-    # Returns a String with the path to the directory where the versioned
-    # file is stored.
-    # Creates the directory if it does not exist.
-    def directory
-      @directory ||= workdir
-    end
-
-    # Returns a tow-dimesnional Array, where each nested Array has two items,
-    # the operation descrtiption Struct and data captured by the operartion.
+    # Returns a two-dimesnional array, where each nested array has two items;
+    # the Description (a struct defined in FileOperations::FileOperation) and
+    # data captured by the operartion (if any).
+    #
+    # <tt>[[description_object, data_or_nil], ...]</tt>
     def captured_data
       filter_history :data
     end
 
-    # Returns the data captured by <em>operation_name</em> and any _options_
-    # the operation was initialized with.
+    # Returns any data captured by <em>operation_name</em>.
+    #
+    # If multiple instances of one operation class have modified the file,
+    # pass any _options_ the specific instance of the operation was initialized
+    # with as the optional second argument.
     def captured_data_for(operation_name, **options)
       raw_data = captured_data.filter do |operation, _|
         operation.name == operation_name &&
@@ -101,14 +84,47 @@ module FilePipeline
       raw_data.map(&:last)
     end
 
-    # Returns +true+ if the file has been modified by operations. It will also
-    # return +true+ if the file has been cloned.
+    # Returns +true+ if there are #versions (file has been modified).
+    #
+    # *Warning:* It will also return +true+ if the file has been cloned.
     def changed?
       current != original
     end
 
-    # Returns the final version as basename + final extension, calls #destroy
-    # use a finalizer? #define_finalizer
+    # Creates a new identical version of #current. Will only add the path of
+    # the file to history, but no FileOperations::Results.
+    def clone
+      filename = FilePipeline.new_basename + current_extension
+      clone_file = VersionedFile.copy(current, directory, filename)
+      self << clone_file
+    end
+
+    # Returns the path to the current file or the #original if no versions
+    # have been created.
+    def current
+      versions.last || original
+    end
+
+    # Returns the file extension for the #current file.
+    def current_extension
+      File.extname current
+    end
+
+    # Returns the path to the directory where the versioned of _self_ are
+    # stored. Creates the directory if it does not exist.
+    def directory
+      @directory ||= workdir
+    end
+
+    # Writes the #current version to #basename, optionally the #target_suffix,
+    # and the #current_extension in #original_dir. Deletes all versions and
+    # resets the #history to an empty Hash. Returns the path to the written
+    # file.
+    #
+    # If the _overwrite_ option is set to +false+ (default), the #target_suffix
+    # will be appended to the #basename and the #original will be preserved.
+    # When set to +true+, the final version wtitten by the method will overwrite
+    # the #original.
     def finalize(overwrite: false)
       filename = overwrite ? replacing_trarget : preserving_taget
       FileUtils.rm original if overwrite
@@ -117,28 +133,38 @@ module FilePipeline
       reset
     end
 
-    # Returns an Array of triplets (arryas with three items) of
-    # operation class name (a String), options (a Hash), and the actual log
-    # (an Array).
+    # Returns an array of triplets (arryas with three items each): the name of
+    # the file operation class (a string), options (a hash), and the actual log
+    # (an array).
     def log
       filter_history(:log)
         .map { |operation, info| [operation.name, operation.options, info] }
     end
 
     # Creates a new version.
-    # <em>target_extension</em>: the file extension of the target file format.
-    # Requires a block that must return a String with a path to an existing
-    # file. The block should take to arguments: one for the current file, and
-    # one for the directory where to store the file.
+    # Requires a block that must return a path to an existing file or an array
+    # with the path and optionally a FileOperations::Results instance:
+    # <tt>['path/to/file', results_object]</tt>.
+    #
+    # The actual file modification logic will be in the block.
+    #
+    # The block must take three arguments: for the #current file (from which the
+    # modified version will be created), the work #directory (to where the
+    # modified file will be written), and the #original file (which will only
+    # be used in modifications that need the original file for reference, such
+    # as modifications that restore file metadata that was lost in other
+    # modifications).
     def modify
       self << yield(current, directory, original)
     end
 
+    # Returns the directory where #original is stored.
     def original_dir
       File.dirname original
     end
 
-    # Returns an Array with filepaths to version files of _self_.
+    # Returns an array with paths to the version files of _self_ (excluding
+    # #original).
     def versions
       history.keys
     end

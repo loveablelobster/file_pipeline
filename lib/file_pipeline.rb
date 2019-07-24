@@ -65,7 +65,7 @@ module FilePipeline
     end
   end
 
-  # Returns a String with the <em>/directory/filename<em>.
+  # Returns a String with the <em>/directory/filename</em>.
   def self.path(dir, filename)
     File.path Pathname.new(dir).join(filename)
   end

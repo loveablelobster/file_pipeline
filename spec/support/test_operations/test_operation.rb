@@ -34,7 +34,8 @@ module FilePipeline
       # take two arguments.
       # An alternative would be to implement the #run method, but then make sure
       # that it takes three arguments: src_file, directory_path, and original
-      def operation(src_file, out_file)
+      def operation(*args)
+        src_file, out_file = args
         image = Vips::Image.new_from_file(src_file).add_alpha
         watermark = Vips::Image.new_from_file options[:image]
         image.composite2(watermark,
