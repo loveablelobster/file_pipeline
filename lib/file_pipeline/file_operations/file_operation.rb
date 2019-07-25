@@ -34,40 +34,6 @@ module FilePipeline
         @options = defaults.merge(opts)
       end
 
-      # Stores +error+ in <tt>log_data</tt>.
-      #
-      # ==== Examples
-      #
-      #   error1 = StandardError.new
-      #   error2 = 'an errror occurred'
-      #   two_errors = [error1, error2]
-      #   data = { mime_type: 'image/jpeg' }
-      #
-      #   FileOperation.store_error('new error', error1)
-      #   # => [[error1, 'new error']]
-      #
-      #   FileOperation.store_error('new error', error2)
-      #   # => [[error2, 'new error']]
-      #
-      #   FileOperation.store_error('new error', data)
-      #   # => [['new error'], data]
-      #
-      #   FileOperation.store_error('new error', [error1, data])
-      #   # => [[error1, 'new error'], data]
-      #
-      #   FileOperation.store_error('new error', two_errors)
-      #   # => [[error1, error2, 'new error']]
-      #
-      #   FileOperation.store_error('new error', [two_errors, data])
-      #   # => [[error1, error2, 'new error'], data]
-      def self.store_error(error, log_data)
-        normalized = Results.normalize_log_data(log_data)
-        return [error] unless normalized
-
-        normalized.first ? normalized.first << error : normalized[0] = [error]
-        normalized
-      end
-
       # Returns the extension for +file+ (a string). This should be the
       # extension for the type the file created by #operation will have.
       #
@@ -158,9 +124,8 @@ module FilePipeline
         log_data = operation src_file, out_file, original
         [out_file, success(log_data)]
       rescue StandardError => e
-        log_data = FileOperation.store_error e, log_data
         FileUtils.rm out_file if File.exist? out_file
-        [out_file, failure(log_data)]
+        [out_file, failure(e)]
       end
 
       # Returns a Results object with the Results#success set to +true+ and

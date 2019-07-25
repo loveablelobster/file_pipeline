@@ -33,7 +33,7 @@ module FilePipeline
     end
 
     # Adds a file operation object #file_operations. The object must implement
-    # a _run_ method.
+    # a _run_ method (see FileOperations::FileOperation#run for details).
     def <<(file_operation_instance)
       unless file_operation_instance.respond_to? :run
         raise TypeError, 'File operations must implement a #run method'
@@ -42,35 +42,38 @@ module FilePipeline
       @file_operations << file_operation_instance
     end
 
-    # Applies all #file_operations to a <em>versioned_file</em> (an instance of
-    # VersionedFile) and returns it.
+    # Applies all #file_operations to a <tt>versioned_file</tt> and returns it.
     def apply_to(versioned_file)
       file_operations.each { |job| run job, versioned_file }
       versioned_file
     end
 
-    # Applies all #file_operations to  an array of VersionedFile instances
-    # (<em>versioned_files</em>) and returns it.
+    # Applies all #file_operations to <tt>versioned_files</tt> (an array) and
+    # returns it.
     def batch_apply(versioned_files)
       versioned_files.map { |file| Thread.new(file) { apply_to(file) } }
                      .map(&:value)
     end
 
-    # Initializes the class for <em>file_operation</em> (a string in
-    # underscore notation) with _options_, adds it to #file_operations, and
-    # returns _self_.
+    # Initializes the class for <tt>file_operation</tt> (a string in
+    # underscore notation) with +options+, adds it to #file_operations, and
+    # returns +self+.
     #
     # If the source file containing the file operation's class definition is not
     # loaded, this method will try to locate it in the
     # FilePipeline.source_directories and require it.
     #
-    # Examples:
-    #   # define single operation
+    # ==== Examples
+    #
+    # Define single operation:
+    #
     #   pipeline.define_operation('ptiff_conversion', :tile => false)
     #
-    #   # chaining
+    # Chaining:
+    #
     #   pipeline.define_operation('scale', width: 1280, height: 1024)
     #           .define_operation('ptiff_conversion')
+    #
     def define_operation(file_operation, options = {})
       operation = FilePipeline.load file_operation
       self << operation.new(options)
@@ -82,13 +85,10 @@ module FilePipeline
       file_operations.empty?
     end
 
-    # Applies _operation_ to <em>versioned_file</em>.
+    # Applies +operation+ to <tt>versioned_file</tt>.
     #
-    # _operation_ must be an object implementing a _run_ method that take three
-    # arguments:
-    # - _version_: path to the file to modify.
-    # - _directory_: working directory where modified versions are to be stored.
-    # - _original_: path to the original file of <em>versioned_file</em>.
+    # +operation+ must be an object implementing a _run_ method that takes three
+    # arguments (see FileOperations::FileOperation#run ).
     def run(operation, versioned_file)
       versioned_file.modify do |version, directory, original|
         operation.run version, directory, original
