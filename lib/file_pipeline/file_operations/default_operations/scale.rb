@@ -37,13 +37,6 @@ module FilePipeline
       # :args: src_file, out_file
       #
       # Writes a scaled version of <tt>src_file</tt> to <tt>out_file</tt>.
-      #
-      # ==== Arguments
-      #
-      # * <tt>src_file</tt> - Path for the file the operation will use as the
-      #   basis for the new version it will create.
-      # * <tt>out_file</tt> - Path the file created by the operation will be
-      #   written to.
       def operation(*args)
         src_file, out_file = args
         image = Vips::Image.new_from_file src_file
@@ -51,31 +44,24 @@ module FilePipeline
         image.resize(factor).write_to_file out_file
       end
 
-      # Calculatees the scale factor to scale +dimensions+ so that it will match
-      # the same total pixel count as +:width+ multiplied by +:height+ given in
-      # #options.
+      # Calculatees the scale factor to scale +dimensions+ (an array with image
+      # width and height in pixels) so that it will match the same total pixel
+      # count as +:width+ multiplied by +:height+ given in #options.
       #
       # *Warning*: rounding errors may occur.
       #
       #--
       # FIXME: avoid rounding errors.
       #++
-      #
-      # ==== Arguments
-      #
-      # * +dimensions+ - An array with image width and heigh in pixels.
       def scale_by_pixels(dimensions)
         out_pixels = sqrt(options[:width] * options[:height]).truncate
         src_pixels = sqrt(dimensions[0] * dimensions[1]).truncate
         out_pixels / src_pixels.to_f
       end
 
-      # Calculates the scale factor to scale +dimensions+ so that it will fit
-      # inside the bounds defined by +:width+ and +:height+ given in #options.
-      #
-      # ==== Arguments
-      #
-      # * +dimensions+ - An array with image width and heigh in pixels.
+      # Calculates the scale factor to scale +dimensions+ (an array with image
+      # width and height in pixels) so that it will fit inside the bounds
+      # defined by +:width+ and +:height+ given in #options.
       def scale_by_bounds(dimensions)
         x = options[:width] / dimensions[0].to_f
         y = options[:height] / dimensions[1].to_f

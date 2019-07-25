@@ -31,11 +31,27 @@ module FilePipeline
     # by #finalize is not replacing the original.
     attr_reader :target_suffix
 
-    # Returns a new instance with _file_ as the #original.
-    # <em>target_suffix</em> is a string to be appended to the file that
+    # Returns a new instance with +file+ as the #original.
+    #
+    # ==== Arguments
+    #
+    # * +file+ - Path to the file the instance will be based on. That file
+    #   should not be touched unless #finalize is called with the +:overwrite+
+    #   option set to +true+.
+    #
+    # *Caveat* it can not be excluded that buggy or malignant file operations
+    # modify the original.
+    #
+    #--
+    # FIXME: protect the original
+    #++
+    #
+    # ==== Options
+    #
+    # <tt>target_suffix</ttm> is a string to be appended to the file that
     # will be written by #finalize (the last version) if #finalize is to
-    # preserve the original. It is recommended to use a UUID to avoid clashes
-    # with other files in the directory.
+    # preserve the original. It is recommended to use a UUID (_default_) to
+    # avoid clashes with other files in the directory.
     def initialize(file, target_suffix: SecureRandom.uuid)
       @original = file
       @basename = File.basename(file, '.*')
@@ -46,7 +62,7 @@ module FilePipeline
 
     # Adds a new version to #history and returns _self_.
     #
-    # <em>version_info</em> must be a path to an existing file or an array with
+    # <tt>version_info</tt> must be a path to an existing file or an array with
     # the path and optionally a FileOperations::Results instance:
     # <tt>['path/to/file', results_object]</tt>.
     # Will move the file to #directory if it is in another directory.
@@ -73,7 +89,7 @@ module FilePipeline
     # Returns any data captured by <em>operation_name</em>.
     #
     # If multiple instances of one operation class have modified the file,
-    # pass any _options_ the specific instance of the operation was initialized
+    # pass any +options+ the specific instance of the operation was initialized
     # with as the optional second argument.
     def captured_data_for(operation_name, **options)
       raw_data = captured_data.filter do |operation, _|
@@ -109,7 +125,7 @@ module FilePipeline
       File.extname current
     end
 
-    # Returns the path to the directory where the versioned of _self_ are
+    # Returns the path to the directory where the versioned of +self+ are
     # stored. Creates the directory if it does not exist.
     def directory
       @directory ||= workdir
@@ -120,10 +136,12 @@ module FilePipeline
     # resets the #history to an empty Hash. Returns the path to the written
     # file.
     #
-    # If the _overwrite_ option is set to +false+ (default), the #target_suffix
-    # will be appended to the #basename and the #original will be preserved.
-    # When set to +true+, the final version wtitten by the method will overwrite
-    # the #original.
+    # ==== Options
+    #
+    # * +overwrite+ - +true+ or +false+
+    #   * +false+ (_default_) - The #target_suffix will be appended to the
+    #     #basename and the #original will be preserved.
+    #   * +true+ - The finalized version will replace the #original.
     def finalize(overwrite: false)
       filename = overwrite ? replacing_trarget : preserving_taget
       FileUtils.rm original if overwrite
@@ -162,7 +180,7 @@ module FilePipeline
       File.dirname original
     end
 
-    # Returns an array with paths to the version files of _self_ (excluding
+    # Returns an array with paths to the version files of +self+ (excluding
     # #original).
     def versions
       history.keys

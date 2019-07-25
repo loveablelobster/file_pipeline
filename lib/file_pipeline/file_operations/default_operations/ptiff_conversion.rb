@@ -33,13 +33,6 @@ module FilePipeline
       # :args: src_file, out_file
       #
       # Writes a pyramid tiff version of <tt>src_file</tt> to <tt>out_file</tt>.
-      #
-      # ==== Arguments
-      #
-      # * <tt>src_file</tt> - Path for the file the operation will use as the
-      #   basis for the new version it will create.
-      # * <tt>out_file</tt> - Path the file created by the operation will be
-      #   written to.
       def operation(*args)
         src_file, out_file = args
         image = Vips::Image.new_from_file src_file

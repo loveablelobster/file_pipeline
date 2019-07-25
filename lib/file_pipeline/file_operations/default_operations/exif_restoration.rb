@@ -35,14 +35,6 @@ module FilePipeline
       #
       # Will return any _Exif_ tags that could not be written and their values
       # from the +original+ file as data.
-      #
-      # ==== Arguments
-      #
-      # * <tt>src_file</tt> - Path for the file the operation will use as the
-      #   basis for the new version it will create.
-      # * <tt>out_file</tt> - Path the file created by the operation will be
-      #   written to.
-      # * +original+ - Path to the original, unmodified, file (optional).
       def operation(src_file, out_file, original)
         original_exif, src_file_exif = read_exif original, src_file
         values = missing_exif_fields(src_file_exif, original_exif)

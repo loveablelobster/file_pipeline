@@ -36,11 +36,6 @@ module FilePipeline
 
       # Stores +error+ in <tt>log_data</tt>.
       #
-      # ==== Arguments
-      #
-      # * +error+ - A string or error
-      # * <tt>log_data</tt> - A string, error, array, hash, or +nil+.
-      #
       # ==== Examples
       #
       #   error1 = StandardError.new
@@ -66,7 +61,7 @@ module FilePipeline
       #   FileOperation.store_error('new error', [two_errors, data])
       #   # => [[error1, error2, 'new error'], data]
       def self.store_error(error, log_data)
-        normalized = Results.parse_log_data(log_data)
+        normalized = Results.normalize_log_data(log_data)
         return [error] unless normalized
 
         normalized.first ? normalized.first << error : normalized[0] = [error]
@@ -76,10 +71,6 @@ module FilePipeline
       # Returns the extension for +file+ (a string). This should be the
       # extension for the type the file created by #operation will have.
       #
-      # ==== Arguments
-      #
-      # * +file+ - the file whose extension will be returned.
-      #
       # If the #operation of a subclass will result in a different extension of
       # predictable type, define a #target_extension method.
       #
@@ -87,12 +78,9 @@ module FilePipeline
         target_extension || File.extname(file)
       end
 
-      # Returns a Results object with the Results#success set to +false+.
-      #
-      # ==== Arguments
-      #
-      # * <tt>log_data</tt> - Any information returned by the operation (a
-      #   string error, array, or hash).
+      # Returns a Results object with the Results#success set to +false+ and
+      # any information returned by the operation in <tt>log_data</tt> (a string
+      # error, array, or hash).
       def failure(log_data = nil)
         results false, log_data
       end
@@ -117,13 +105,9 @@ module FilePipeline
         raise 'not implemented'
       end
 
-      # Returns a new Results object with the #description of +self+.
-      #
-      # ==== Arguments
-      #
-      # * +success+ - Value for Results#success (+true+ or +false+)
-      # * <tt>log_data</tt> - Any information returned by the operation in the
-      #   form of a string, error, array, or hash.
+      # Returns a new Results object with the #descrip1tion of +self+, +success+,
+      # and any information returned by the operation as <tt>log_data</tt>
+      # (a string, error, array, or hash.)
       #
       # ==== Examples
       #
@@ -164,20 +148,11 @@ module FilePipeline
       # kind of return value.
       #
       # The method will create a new path for the file produced by #operation to
-      # be written to. This path is created by calling #target with the
-      # +directory+ and #extension with the <tt>src_file</tt>. This means that
-      # the extension for the file to be created will be the same as that of the
-      # <tt>src_file</tt>. If the operation results in a file of different type
-      # than <tt>src_file</tt>, make sure to override #extension, to return the
-      # appropriate file type extension.
+      # be written to. This path will consist of +directory+ and a new basename.
       #
-      # ==== Arguments
-      #
-      # * <tt>src_file</tt> - Path for the file the operation will use as the
-      #   basis for the new version it will create.
-      # * +directory+ - Path to the directory to which the new version will be
-      #   written.
-      # * +original+ - Path to the original, unmodified, file (optional).
+      # The optional +original+ argument can be used to reference another file,
+      # e.g. when exif metadata tags missing in the <tt>src_file</tt> are to
+      # be copied over from another file.
       def run(src_file, directory, original = nil)
         out_file = target directory, extension(src_file)
         log_data = operation src_file, out_file, original
@@ -188,26 +163,20 @@ module FilePipeline
         [out_file, failure(log_data)]
       end
 
-      # Returns a Results object with the Results#success set to +true+.
-      #
-      # ==== Arguments
-      #
-      # * <tt>log_data</tt> - Any information returned by the operation (a
-      #   string error, array, or hash).
+      # Returns a Results object with the Results#success set to +true+ and
+      # any information returned by the operation in <tt>log_data</tt> (a string
+      # error, array, or hash).
       def success(log_data = nil)
         results true, log_data
       end
 
-      # Returns a new path <em>directory/file_name.extension</em> to which the
-      # file created by the operation can be written.
+      # Returns a new path to which the file created by the operation can be
+      # written. The path will be in +directory+, with a new basename determined
+      # by +kind+ and have the specified file +extension+.
       #
-      # ==== Arguments
-      #
-      # * +directory+ - the path to the directory where for the new file.
-      # * +extension+ - the extension for the file type.
-      # * +kind+ - type of basename to be created:
-      #   * +:timestamp+ (_default_) - Creates a timestamp basename.
-      #   * +:random+ - Creates a UUID basename.
+      # There are two options for the +kind+ of basename to be created:
+      # * +:timestamp+ (_default_) - Creates a timestamp basename.
+      # * +:random+ - Creates a UUID basename.
       #
       # The timestamp format is <tt>YYYY-MM-DDTHH:MM:SS.NNNNNNNNN</TT>.
       #

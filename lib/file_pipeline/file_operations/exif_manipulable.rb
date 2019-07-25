@@ -4,31 +4,42 @@ require 'multi_exiftool'
 
 module FilePipeline
   module FileOperations
-    # Mixin with methods to work with Exif metadata.
+    # Mixin with methods to facilitate work with _Exif_ metadata.
     module ExifManipulable
       # Returns an Array of tags to be ignored during comparison. These can
       # be merged with an ExifManipulable including FileOperation's options
-      # to skip tags (e.g. ExifRestoration#options +skip_tags+).
+      # to skip tags (e.g. the <tt>skip_tags</tt> option in ExifRestoration).
       def self.file_tags
         %w[FileSize FileModifyDate FileAccessDate FileInodeChangeDate
            FilePermissions FileType FileTypeExtension MIMEType]
       end
 
-      def self.parse_tag_error(message)
+      def self.parse_tag_error(message) # :nodoc:
         /Warning: Sorry, (?<tag>\w+) is not writable/
           .match(message) { |match| match[:tag] }
       end
 
-      def self.strip_path(str)
+      def self.strip_path(str) # :nodoc:
         str.sub(%r{ - \/?(\/|[-:.]+|\w+)+\.\w+$}, '')
       end
 
+      # Compares to hashes with exif tags and values and returns a hash with
+      # the tags that are present in <tt>other_exif</tt> but absent in
+      # <tt>this_exif</tt>.
       def missing_exif_fields(this_exif, other_exif)
-        other_exif.to_h.delete_if do |tag, _|
-          this_exif.to_h.key?(tag) || options[:skip_tags].include?(tag)
+        other_exif.delete_if do |tag, _|
+          this_exif.key?(tag) || options[:skip_tags].include?(tag)
         end
       end
 
+      # :args: error_messages, exif
+      #
+      # Takes an array of <tt>error_messages</tt> and a hash (+exif+) with tags
+      # and their values and parses errors where tags could not be written.
+      #
+      # Returns an array with a log (any messages that were not errors where a
+      # tag could not be written) and data (a hash with any tags that could not
+      # be written, and the associated values from +exif+)
       def parse_exif_errors(errs, values)
         errs.each_with_object([[], {}]) do |message, info|
           errors, data = info
@@ -42,14 +53,20 @@ module FilePipeline
         end
       end
 
+      # Reads exif information for one or more +files+. Returns an array of
+      # hashes, one for each file, with tags and their values.
       def read_exif(*files)
         file_paths = files.map { |f| File.expand_path(f) }
         results, errors = MultiExiftool.read file_paths
         raise 'Error reading Exif' unless errors.empty?
 
-        results
+        results.map(&:to_h)
       end
 
+      # Writes +values+ (a hash with exif tags as keys) to +out_file+.
+      #
+      # Returns an array with a log (an array of messages - strings) and a
+      # hash with all tags/values that could not be written.
       def write_exif(out_file, values)
         writer = MultiExiftool::Writer.new
         writer.filenames = Dir[File.expand_path(out_file)]
