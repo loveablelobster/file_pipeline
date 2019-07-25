@@ -2,18 +2,28 @@
 
 module FilePipeline
   module FileOperations
-    # Contains information about the results after _self_ was #run.
+    # Contains information about the results afters
     # +:operation+: an Operation Struct
-    # +:success+: +true+ or +false+
-    # +:log+: an Array with log messages from operations, e.g. errors
-    # +:data+: a Hash with any data returned from operations.
     class Results
+      # The object (usually an instance of a subclass of FileOperation) that
+      # created +self+
       attr_reader :operation
+
+      # +true+ if the operation has finished and produced a version file,
+      # or +false+ if it encountered an error that caused it to terminate.
       attr_reader :success
+
+      # Array with log messages from operations.
       attr_reader :log
+
+      # Hash with any data returned from an operation.
       attr_reader :data
 
       # Returns a new instance.
+      #
+      # ==== Arguments
+      #
+      # * +operation+ - Must respond to #name and #options
       def initialize(operation, success, log_data)
         @operation = operation
         @success = success

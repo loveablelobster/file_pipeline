@@ -19,14 +19,6 @@ module FilePipeline
     # must have a #target_extension method that returns the appropriate
     # extension.
     class FileOperation
-      # A _Struct_ that contains a description for an operation.
-      #
-      # ==== Attributes
-      #
-      # * +:name+ - The Class name of the operation (String)
-      # * +:options+ - The options for the operation when #run was called
-      Description = Struct.new(:name, :options)
-
       # A Hash; any options used when performing #operation.
       attr_reader :options
 
@@ -81,21 +73,6 @@ module FilePipeline
         normalized
       end
 
-      # Returns a Description Struct with the class name of +self+ and
-      # #options.
-      #
-      # ==== Example
-      #
-      #   my_op = MyOperation.new(do_this: true, do_that: false)
-      #   my_op.description
-      #   # => <struct FileOperation::Description
-      #   #            name='MyOperation',
-      #   #            options={do_this: true, do_that: false}>
-      def description
-        class_name = self.class.name.split('::').last
-        Description.new class_name, options
-      end
-
       # Returns the extension for +file+ (a string). This should be the
       # extension for the type the file created by #operation will have.
       #
@@ -118,6 +95,10 @@ module FilePipeline
       #   string error, array, or hash).
       def failure(log_data = nil)
         results false, log_data
+      end
+
+      def name
+        self.class.name.split('::').last
       end
 
       # :args: src_file, out_file, original = nil
@@ -172,7 +153,7 @@ module FilePipeline
       #   # => <Results @data=data, @log=[error, warning], ..., @success=false>
       #
       def results(success, log_data = nil)
-        Results.new(description, success, log_data)
+        Results.new(self, success, log_data)
       end
 
       # Runs the operation on <tt>src_file</tt> and retunes an array with a

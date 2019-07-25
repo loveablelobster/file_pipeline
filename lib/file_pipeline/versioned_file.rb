@@ -63,8 +63,7 @@ module FilePipeline
     end
 
     # Returns a two-dimesnional array, where each nested array has two items;
-    # the Description (a struct defined in FileOperations::FileOperation) and
-    # data captured by the operartion (if any).
+    # the file operation object and data captured by the operartion (if any).
     #
     # <tt>[[description_object, data_or_nil], ...]</tt>
     def captured_data
