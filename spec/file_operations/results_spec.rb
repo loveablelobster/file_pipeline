@@ -56,42 +56,6 @@ module FilePipeline
 
         it { expect(new_instance.data).to be_nil }
       end
-
-      describe '.normalize_log_data(obj)' do
-        subject { described_class.normalize_log_data log_data }
-
-        let(:error) { StandardError.new }
-
-        context 'when passed nil' do
-          let(:log_data) { nil }
-
-          it { is_expected.to be_nil }
-        end
-
-        context 'when passed a string' do
-          let(:log_data) { 'a warning' }
-
-          it { is_expected.to match_array [['a warning']] }
-        end
-
-        context 'when passed an error' do
-          let(:log_data) { error }
-
-          it { is_expected.to match_array [[error]] }
-        end
-
-        context 'when passed a message and data' do
-          let(:log_data) { ['a warning', data] }
-
-          it { is_expected.to match_array [['a warning'], data] }
-        end
-
-        context 'when passed data and an error' do
-          let(:log_data) { [data, error] }
-
-          it { is_expected.to match_array [[error], data] }
-        end
-      end
     end
   end
 end

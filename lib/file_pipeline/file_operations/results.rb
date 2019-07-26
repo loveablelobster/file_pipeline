@@ -63,7 +63,7 @@ module FilePipeline
       def initialize(operation, success, log_data)
         @operation = operation
         @success = success
-        @log, @data = Results.normalize_log_data log_data
+        @log, @data = LogDataParser.new log_data
       end
 
       def self.return_data(obj) # :nodoc:
@@ -91,58 +91,6 @@ module FilePipeline
         [[obj]]
       end
 
-      # :args: log_data_object
-      #
-      # Accepts an object that may be an individual error or message, a _log_
-      # (arrays of errors and messages), _data_ (hash), or an array containing
-      # combintions of the above and returns a normalized array with the _log_
-      # at index 0 and _data_ at index 1: <tt>[log, data]</tt>.
-      #
-      # ==== Examples
-      #
-      # When passed +nil+, will return +nil+:
-      #
-      #   Results.normalize_log_data(nil)
-      #   # => nil
-      #
-      # When passed individual messages or errors, those will be wrapped in an
-      # array, which will be the log:
-      #
-      #   Results.normalize_log_data(StandardError.new)
-      #   # => [[#<StandardError: StandardError>]]
-      #
-      #   Results.normalize_log_data('a warning')
-      #   # => [['a warning']]
-      #
-      # This is also true when the message or error is passed along with data:
-      #
-      #   Results.normalize_log_data(['a warning', { a_key: 'some value' }])
-      #   # => [['a warning'], { a_key: 'some value' }]
-      #
-      #
-      # When passed a hash with data, returns an array with +nil+ and the hash:
-      #
-      #   Results.normalize_log_data(['a warning', { a_key: 'some value' }])
-      #   # => [nil, { a_key: 'some value' }]
-      #
-      # When passed an arry that does contain neither arrays nor hashes, this
-      # is considered to be the _log_.
-      #
-      #   Results.normalize_log_data(['a warning', StandardError.new])
-      #   # => [['a warning', #<StandardError: StandardError>]]
-      #
-      # When passed an array containing an array and a hash, the inner array is
-      # interpreted as the log, the hash as the data.
-      #
-      #   log = ['a warning', 'another warning']
-      #   data = { a_key: 'some value' }
-      #
-      #   Results.normalize_log_data([log, data])
-      #   # => [['a warning', 'another warning'], { a_key: 'some value' }]
-      #
-      #   Results.normalize_log_data([data, log])
-      #   # => [['a warning', 'another warning'], { a_key: 'some value' }]
-      #
       def self.normalize_log_data(obj)
         return unless obj
 
