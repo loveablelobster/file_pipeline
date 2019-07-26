@@ -7,6 +7,10 @@ module FilePipeline
     # A FileOperation that compares Exif Metadata in two files and copies tags
     # missing in one from the other. Used to restore Exif tags that were not
     # preserved during e.g. a file conversion.
+    #
+    # *Caveat:* if this operation is applied to a file together with
+    # ExifRedaction, it should be applied _before_ the latter, to avoid
+    # redacted tags being restored.
     class ExifRestoration < FileOperation
       include ExifManipulable
 

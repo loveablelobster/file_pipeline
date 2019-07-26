@@ -36,8 +36,8 @@ module FilePipeline
     #   LogDataParser.new(['a warning', { a_key: 'some value' }]).to_a
     #   # => [['a warning'], { a_key: 'some value' }]
     #
-    #   LogDataParser.new(['a warning', { a_key: 'some value' }, 'an error']).to_a
-    #   # => [['a warning', 'an error'], { a_key: 'some value' }]
+    #   LogDataParser.new(['a warning', { a_key: 'some value' }, 'error']).to_a
+    #   # => [['a warning', 'error'], { a_key: 'some value' }]
     #
     # When initialized with a hash, the array will be +nil+ and the hash:
     #
@@ -63,6 +63,11 @@ module FilePipeline
     #   LogDataParser.new([data, log])
     #   # => [['a warning', 'another warning'], { a_key: 'some value' }]
     #
+    # When initialized with an array containing a hash and nil
+    #
+    #   LogDataParser.new([nil, data]).to_a
+    #   # => [nil, { a_key: 'some value' }]
+    #
     class LogDataParser
       # :args: object
       #
@@ -72,6 +77,7 @@ module FilePipeline
       def initialize(obj)
         @log_data = nil
         parse obj
+        normalize
       end
 
       private
@@ -80,6 +86,13 @@ module FilePipeline
         super unless respond_to_missing? method_name.to_sym
 
         @log_data.public_send method_name, *args, &block
+      end
+
+      def normalize
+        return unless @log_data[0].is_a? Array
+
+        @log_data[0].compact!
+        @log_data[0] = nil if @log_data[0].empty?
       end
 
       def parse(obj)

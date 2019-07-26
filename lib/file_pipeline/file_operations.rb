@@ -13,7 +13,16 @@ module FilePipeline
   #
   # === Subclassing FileOperation
   #
-  # === Source directories
+  # ==== Defining the #operation method
+  #
+  #   def operation(*args)
+  #     src_file, out_file = args
+  #
+  #     # do something
+  #
+  #   end
+  #
+  # ==== Returning logs and data
   #
   module FileOperations
   end

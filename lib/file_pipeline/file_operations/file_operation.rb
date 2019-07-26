@@ -71,9 +71,9 @@ module FilePipeline
         raise 'not implemented'
       end
 
-      # Returns a new Results object with the #descrip1tion of +self+, +success+,
-      # and any information returned by the operation as <tt>log_data</tt>
-      # (a string, error, array, or hash.)
+      # Returns a new Results object with the #descrip1tion of +self+,
+      # +success+, and any information returned by the operation as
+      # <tt>log_data</tt> (a string, error, array, or hash.)
       #
       # ==== Examples
       #

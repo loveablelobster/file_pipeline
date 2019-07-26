@@ -35,7 +35,7 @@ module FilePipeline
           result, = MultiExiftool.read out_file
           result.first
         end
-        expect(out_exif.call(restored)).to include 'Model' => 'PEN-F'
+        expect(out_exif.call(restored.first)).to include 'Model' => 'PEN-F'
       end
 
       it { is_expected.to include a_timestamp_filename }

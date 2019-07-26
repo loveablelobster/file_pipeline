@@ -23,6 +23,15 @@ module FilePipeline
         str.sub(%r{ - \/?(\/|[-:.]+|\w+)+\.\w+$}, '')
       end
 
+      # Redacts (deletes) all <tt>tags_to_delete</tt> in <tt>out_file</tt>.
+      def delete_tags(out_file, tags_to_delete)
+        exif, = read_exif out_file
+        values = exif.select { |tag| tags_to_delete.include? tag }
+        values_to_delete = values.transform_values { nil }
+        log, = write_exif out_file, values_to_delete
+        [log, values]
+      end
+
       # Compares to hashes with exif tags and values and returns a hash with
       # the tags that are present in <tt>other_exif</tt> but absent in
       # <tt>this_exif</tt>.

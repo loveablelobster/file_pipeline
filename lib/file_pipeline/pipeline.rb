@@ -24,8 +24,13 @@ module FilePipeline
 
     # Returns a new instance.
     #
-    # If <em>src_directories</em> are provided, they will be added to
+    # If <tt>src_directories</tt> are provided, they will be added to
     # FilePipeline.source_directories.
+    #
+    # ==== Arguments
+    #
+    # * <tt>src_directories</tt> - one or more paths to directories where
+    #   classes for file operations are defined.
     def initialize(*src_directories)
       src_directories.each { |dir| FilePipeline << dir }
       @file_operations = []
