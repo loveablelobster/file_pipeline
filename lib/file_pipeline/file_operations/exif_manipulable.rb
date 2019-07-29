@@ -50,7 +50,7 @@ module FilePipeline
       # tag could not be written) and data (a hash with any tags that could not
       # be written, and the associated values from +exif+)
       def parse_exif_errors(errs, values)
-        errs.each_with_object([[], {}]) do |message, info|
+        errs.each_with_object(LogDataParser.template) do |message, info|
           errors, data = info
           tag = ExifManipulable.parse_tag_error(message)
           if tag

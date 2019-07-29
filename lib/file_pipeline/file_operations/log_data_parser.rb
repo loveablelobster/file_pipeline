@@ -80,6 +80,11 @@ module FilePipeline
         normalize
       end
 
+      # Returns a trwo element array with an empty array and a hash.
+      def self.template
+        [[], {}]
+      end
+
       private
 
       def method_missing(method_name, *args, &block)

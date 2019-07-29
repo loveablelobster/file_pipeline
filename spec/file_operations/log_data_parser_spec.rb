@@ -92,6 +92,12 @@ module FilePipeline
 
         it { is_expected.to match_array [[warning, error], data] }
       end
+
+      describe '.template' do
+        subject { described_class.template }
+
+        it { is_expected.to match_array [[], {}] }
+      end
     end
   end
 end
