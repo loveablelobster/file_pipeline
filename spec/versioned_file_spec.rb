@@ -119,7 +119,7 @@ module FilePipeline
         it do
           expect(captured)
             .to include a_collection_including(exif_description,
-                                               non_writable_tags)
+                                               metadata: non_writable_tags)
         end
       end
 
@@ -128,7 +128,7 @@ module FilePipeline
           versioned_file.captured_data_for 'ExifRestoration', skip_tags: tags
         end
 
-        it { is_expected.to include non_writable_tags }
+        it { is_expected.to include metadata: non_writable_tags }
       end
 
       describe '#log' do

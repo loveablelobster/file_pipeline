@@ -29,7 +29,7 @@ module FilePipeline
         values = exif.select { |tag| tags_to_delete.include? tag }
         values_to_delete = values.transform_values { nil }
         log, = write_exif out_file, values_to_delete
-        [log, values]
+        [log, { metadata: values }]
       end
 
       # Compares to hashes with exif tags and values and returns a hash with
@@ -54,7 +54,7 @@ module FilePipeline
           errors, data = info
           tag = ExifManipulable.parse_tag_error(message)
           if tag
-            data[tag] = values[tag]
+            (data[:metadata] ||= {}).store tag, values[tag]
             next info
           end
           errors << ExifManipulable.strip_path(message)

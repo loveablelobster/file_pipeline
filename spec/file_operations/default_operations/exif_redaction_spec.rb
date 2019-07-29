@@ -18,7 +18,7 @@ module FilePipeline
       let(:tags) { %w[Make Model Lens LensInfo CreatorTool Software] }
       let(:src_exif) { MultiExiftool.read(src_file1)[0][0] }
 
-      let :include_deleted_values do
+      let :deleted_values do
         include 'Make' => 'OLYMPUS CORPORATION', 'Model' => 'PEN-F',
                 'Lens' => 'LEICA DG MACRO-ELMARIT 45/F2.8',
                 'LensInfo' => '45mm f/2.8',
@@ -53,7 +53,7 @@ module FilePipeline
 
       it { expect(redacted.last).to have_attributes success: be_truthy }
 
-      it { expect(redacted.last.data).to include_deleted_values }
+      it { expect(redacted.last.data).to include metadata: deleted_values }
 
       it { expect(redacted.last.log).to be_nil }
     end
