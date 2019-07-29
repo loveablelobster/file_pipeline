@@ -88,7 +88,7 @@ module FilePipeline
       filter_history :data
     end
 
-    # Returns any data captured by <em>operation_name</em>.
+    # Returns any data captured by <tt>operation_name</tt>.
     #
     # If multiple instances of one operation class have modified the file,
     # pass any +options+ the specific instance of the operation was initialized
@@ -99,6 +99,19 @@ module FilePipeline
           options.all? { |k, v| operation.options[k] == v }
       end
       raw_data.map(&:last)
+    end
+
+    # Returns an array with all data captured by operations with +tag+ has.
+    #
+    # Tags are defined in FileOperations::CapturedDataTags
+    def captured_data_with(tag)
+      return unless changed?
+
+      captured_data.map do |operation, results|
+        next unless operation.captured_data_tag == tag
+
+        results
+      end
     end
 
     # Returns +true+ if there are #versions (file has been modified).
@@ -199,6 +212,13 @@ module FilePipeline
     # Returns the directory where #original is stored.
     def original_dir
       File.dirname original
+    end
+
+    # Returns a hash into which all captured data from file operations with the
+    # FileOperations::CapturedDataTags::DROPPED_EXIF_DATA has been merged.
+    def recovered_metadata
+      captured_data_with(FileOperations::CapturedDataTags::DROPPED_EXIF_DATA)
+        &.reduce({}) { |recovered, data| recovered.merge data }
     end
 
     # Returns an array with paths to the version files of +self+ (excluding

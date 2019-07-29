@@ -27,6 +27,10 @@ module FilePipeline
         super(defaults, opts)
       end
 
+      def captured_data_tag
+        CapturedDataTags::DROPPED_EXIF_DATA
+      end
+
       # :args: src_file, out_file
       #
       # Writes a new version of <tt>src_file</tt> to <tt>out_file</tt> with all

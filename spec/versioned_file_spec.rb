@@ -118,7 +118,7 @@ module FilePipeline
 
         let :restoration_capture do
           a_collection_including exif_description,
-                                 recovered_metadata: non_writable_tags
+                                 non_writable_tags
         end
 
         it do
@@ -132,7 +132,7 @@ module FilePipeline
           versioned_file.captured_data_for 'ExifRestoration', skip_tags: tags
         end
 
-        it { is_expected.to include recovered_metadata: non_writable_tags }
+        it { is_expected.to include non_writable_tags }
       end
 
       describe '#log' do
@@ -149,6 +149,40 @@ module FilePipeline
           expect(log)
             .to include a_collection_including('ExifRestoration', opts, warning)
         end
+      end
+    end
+
+    describe '#captured_data_with(tag)' do
+      subject do
+        tag = FileOperations::CapturedDataTags::DROPPED_EXIF_DATA
+        versioned_file.captured_data_with(tag)
+      end
+
+      context 'when no modifications have occurred' do
+        it { is_expected.to be_nil }
+      end
+
+      context 'when modifications have occurred' do
+        before do
+          pipeline = Pipeline.new do |ppln|
+            ppln.define_operation('ptiff_conversion')
+            ppln.define_operation('exif_restoration')
+            ppln.define_operation('exif_redaction',
+                                  redact_tags: %w[CreatorTool Software])
+          end
+
+          pipeline.apply_to versioned_file
+        end
+
+        let :include_expected_values do
+          include non_writable_tags,
+                  a_hash_including('Software' => 'Flying Meat Acorn 6.0.3',
+                                   'CreatorTool' => 'Flying Meat Acorn 6.0.3')
+        end
+
+        after { FileUtils.rm_r exampledir1 if File.exist? exampledir1 }
+
+        it { is_expected.to include_expected_values }
       end
     end
 
@@ -291,16 +325,38 @@ module FilePipeline
       end
     end
 
-    describe '#history'
+    describe '#history' do
+      subject { versioned_file.history }
 
+      context 'when no modifications have occurred' do
+        it { is_expected.to be_empty }
+      end
+
+      context 'when modifications have occurred' do
+        subject(:history) { versioned_file.history }
+
+        before do
+          versioned_file.modify { |src, path| converter.run src, path }
+        end
+
+        it do
+          expect(history).to be_a(Hash).and(include a_timestamp_filename)
+          # and an instance of results
+        end
+      end
+    end
+
+    # FIXME: these specs are terrible
     describe '#metadata' do
       subject(:file_metadata) { versioned_file.metadata }
 
-# FIXME: specs have issues with FileAccessDate exif tag when running all specs
       context 'when no modifications have occurred' do
-#         let(:original_exif) { MultiExiftool.read(src_file1)[0][0].to_h }
-#
-#         it { is_expected.to eq original_exif }
+        let(:original_exif) { MultiExiftool.read(src_file1)[0][0].to_h }
+
+        it do
+          expect(file_metadata.delete_if { |k, _| k == 'FileAccessDate' } )
+            .to eq original_exif.delete_if { |k, _| k == 'FileAccessDate' }
+        end
       end
 
       context 'when modifications have occurred' do
@@ -317,7 +373,8 @@ module FilePipeline
               File.expand_path val
             end
           end
-          expect(file_metadata).to eq final_exif.call
+          expect(file_metadata.delete_if { |k, _| k == 'FileAccessDate' } )
+            .to eq final_exif.call.delete_if { |k, _| k == 'FileAccessDate' }
         end
       end
     end
@@ -364,7 +421,52 @@ module FilePipeline
       it { is_expected.to eq 'spec/support/example1.jpg' }
     end
 
-    describe '#verions' do
+    describe '#recovered_metadata' do
+      subject { versioned_file.recovered_metadata }
+
+      context 'when no modifications have occurred' do
+        it { is_expected.to be_nil }
+      end
+
+      context 'when modifications have occurred' do
+        before do
+          pipeline = Pipeline.new do |ppln|
+            ppln.define_operation('ptiff_conversion')
+            ppln.define_operation('exif_restoration')
+            ppln.define_operation('exif_redaction',
+                                  redact_tags: %w[CreatorTool Software])
+          end
+
+          pipeline.apply_to versioned_file
+        end
+
+        let :expected_values do
+          {
+            'JFIFVersion' => 1.01,
+            'EncodingProcess' => 'Baseline DCT, Huffman coding',
+            'ColorComponents' => 3,
+            'Aperture' => 8.0,
+            'DateTimeCreated' => Time.new(2017, 11, 30, 11, 33, 15),
+            'DigitalCreationDateTime' => Time.new(2017, 11, 30, 11, 33, 15),
+            'ScaleFactor35efl' => 2.0,
+            'ShutterSpeed' => Rational(1, 100),
+            'CircleOfConfusion' => '0.015 mm',
+            'FOV' => '22.6 deg',
+            'FocalLength35efl' => '45.0 mm (35 mm equivalent: 90.0 mm)',
+            'HyperfocalDistance' => '16.85 m',
+            'LightValue' => 10.0,
+            'Software' => 'Flying Meat Acorn 6.0.3',
+            'CreatorTool' => 'Flying Meat Acorn 6.0.3'
+          }
+        end
+
+        after { FileUtils.rm_r exampledir1 if File.exist? exampledir1 }
+
+        it { is_expected.to eq expected_values }
+      end
+    end
+
+    describe '#versions' do
       subject { versioned_file.versions }
 
       context 'when no modifications or cloning have occurred' do

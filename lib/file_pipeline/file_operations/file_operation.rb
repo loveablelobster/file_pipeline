@@ -34,6 +34,10 @@ module FilePipeline
         @options = defaults.merge(opts)
       end
 
+      def captured_data_tag
+        CapturedDataTags::NO_DATA
+      end
+
       # Returns the extension for +file+ (a string). This should be the
       # extension for the type the file created by #operation will have.
       #
