@@ -3,19 +3,7 @@
 module FilePipeline
   # VersionedFile creates a directory where it stores any versions of _file_.
   class VersionedFile
-    # Copies the file with path _src_ to <em>/dir/filename</em>.
-    def self.copy(src, dir, filename)
-      dest = FilePipeline.path(dir, filename)
-      FileUtils.cp src, dest
-      dest
-    end
-
-    # Moves the file with path _src_ to <em>/dir/filename</em>.
-    def self.move(src, dir, filename)
-      dest = FilePipeline.path(dir, filename)
-      FileUtils.mv src, dest
-      dest
-    end
+    include FileOperations::ExifManipulable
 
     # The basename of the versioned file.
     attr_reader :basename
@@ -58,6 +46,20 @@ module FilePipeline
       @history = {}
       @directory = nil
       @target_suffix = target_suffix
+    end
+
+    # Copies the file with path _src_ to <em>/dir/filename</em>.
+    def self.copy(src, dir, filename)
+      dest = FilePipeline.path(dir, filename)
+      FileUtils.cp src, dest
+      dest
+    end
+
+    # Moves the file with path _src_ to <em>/dir/filename</em>.
+    def self.move(src, dir, filename)
+      dest = FilePipeline.path(dir, filename)
+      FileUtils.mv src, dest
+      dest
     end
 
     # Adds a new version to #history and returns _self_.
@@ -156,6 +158,25 @@ module FilePipeline
     def log
       filter_history(:log)
         .map { |operation, info| [operation.name, operation.options, info] }
+    end
+
+    # Returns the Exif metadata
+    #
+    # ==== Options
+    #
+    # * <tt>:for_version</tt> - +current+ or +original+
+    #   * +current+ (_default_) - Metadata for the #current file will be
+    #     returned.
+    #   * +original+ - Metadata for the #original file will be returned.
+    #
+    #--
+    # TODO: when file is not an image file, this should return other metadata
+    # than exif.
+    # TODO: implement the option to return metadata for a specif version index
+    #++
+    def metadata(for_version: :current)
+      file = public_send for_version
+      read_exif(file).first
     end
 
     # Creates a new version.

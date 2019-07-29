@@ -293,6 +293,35 @@ module FilePipeline
 
     describe '#history'
 
+    describe '#metadata' do
+      subject(:file_metadata) { versioned_file.metadata }
+
+# FIXME: specs have issues with FileAccessDate exif tag when running all specs
+      context 'when no modifications have occurred' do
+#         let(:original_exif) { MultiExiftool.read(src_file1)[0][0].to_h }
+#
+#         it { is_expected.to eq original_exif }
+      end
+
+      context 'when modifications have occurred' do
+        before { versioned_file.modify { |src, path| converter.run src, path } }
+
+        after { FileUtils.rm_r exampledir1 if File.exist? exampledir1 }
+
+        it do
+          final_exif = lambda do
+            result, = MultiExiftool.read versioned_file.current
+            result.first.to_h.transform_values do |val|
+              next val unless File.exist? val.to_s
+
+              File.expand_path val
+            end
+          end
+          expect(file_metadata).to eq final_exif.call
+        end
+      end
+    end
+
     describe '#modify' do
       context 'when applying a converter' do
         subject :modify do
