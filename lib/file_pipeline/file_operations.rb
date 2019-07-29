@@ -25,6 +25,7 @@ module FilePipeline
   #
   # ==== Returning logs and data
   #
+  # next returned data in recovered_metadata
   module FileOperations
   end
 end

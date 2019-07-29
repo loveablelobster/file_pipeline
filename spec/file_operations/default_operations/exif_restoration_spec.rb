@@ -46,8 +46,9 @@ module FilePipeline
 
       it { expect(restored.last).to have_attributes success: be_truthy }
 
-      it { expect(restored.last.data).to include metadata: include_tags }
-
+      it do
+        expect(restored.last.data).to include recovered_metadata: include_tags
+      end
       it { expect(restored.last.log).to include error }
     end
   end

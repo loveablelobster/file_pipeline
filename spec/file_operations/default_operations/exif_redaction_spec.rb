@@ -53,7 +53,9 @@ module FilePipeline
 
       it { expect(redacted.last).to have_attributes success: be_truthy }
 
-      it { expect(redacted.last.data).to include metadata: deleted_values }
+      it do
+        expect(redacted.last.data).to include recovered_metadata: deleted_values
+      end
 
       it { expect(redacted.last.log).to be_nil }
     end
