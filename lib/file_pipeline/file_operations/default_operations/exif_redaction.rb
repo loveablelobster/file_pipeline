@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require_relative '../exif_manipulable'
-
 module FilePipeline
   module FileOperations
     # A FileOperation that will redact (delete) unwanted _Exif_ tags from a

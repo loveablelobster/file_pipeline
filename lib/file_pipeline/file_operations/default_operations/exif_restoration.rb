@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require_relative '../exif_manipulable'
-
 module FilePipeline
   module FileOperations
     # A FileOperation that compares Exif Metadata in two files and copies tags
