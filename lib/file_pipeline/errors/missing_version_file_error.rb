@@ -5,6 +5,9 @@ module FilePipeline
     # Error class for exceptions that are raised when a new version is added,
     # but no actual file is associated with it.
     class MissingVersionFileError < StandardError
+      # The file that could not be found.
+      attr_reader :file
+
       def initialize(msg = nil, file: nil)
         @file = file
         msg ||= "File missing for version '#{@file}'"
