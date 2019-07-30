@@ -21,20 +21,20 @@ module FilePipeline
 
     # Returns a new instance with +file+ as the #original.
     #
-    # ==== Arguments
+    # ===== Arguments
     #
     # * +file+ - Path to the file the instance will be based on. That file
     #   should not be touched unless #finalize is called with the +:overwrite+
     #   option set to +true+.
     #
-    # *Caveat* it can not be excluded that buggy or malignant file operations
+    # *Caveat* it can not be ruled out that buggy or malignant file operations
     # modify the original.
     #
     #--
     # FIXME: protect the original
     #++
     #
-    # ==== Options
+    # ===== Options
     #
     # <tt>target_suffix</ttm> is a string to be appended to the file that
     # will be written by #finalize (the last version) if #finalize is to
@@ -151,7 +151,7 @@ module FilePipeline
     # resets the #history to an empty Hash. Returns the path to the written
     # file.
     #
-    # ==== Options
+    # ===== Options
     #
     # * +overwrite+ - +true+ or +false+
     #   * +false+ (_default_) - The #target_suffix will be appended to the
@@ -175,7 +175,7 @@ module FilePipeline
 
     # Returns the Exif metadata
     #
-    # ==== Options
+    # ===== Options
     #
     # * <tt>:for_version</tt> - +current+ or +original+
     #   * +current+ (_default_) - Metadata for the #current file will be

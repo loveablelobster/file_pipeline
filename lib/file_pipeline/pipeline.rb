@@ -17,6 +17,7 @@ module FilePipeline
   #     pipeline.define_operation('ptiff_conversion',
   #                               tile_width: 64, tile_height: 64)
   #   end
+  #
   class Pipeline
     # An array of file operations that will be applied to files in the order
     # they have been added.
@@ -27,7 +28,7 @@ module FilePipeline
     # If <tt>src_directories</tt> are provided, they will be added to
     # FilePipeline.source_directories.
     #
-    # ==== Arguments
+    # ===== Arguments
     #
     # * <tt>src_directories</tt> - one or more paths to directories where
     #   classes for file operations are defined.
@@ -68,7 +69,7 @@ module FilePipeline
     # loaded, this method will try to locate it in the
     # FilePipeline.source_directories and require it.
     #
-    # ==== Examples
+    # ===== Examples
     #
     # Define single operation:
     #

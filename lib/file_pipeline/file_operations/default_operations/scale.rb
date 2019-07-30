@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'ruby-vips'
-
 module FilePipeline
   module FileOperations
     # Scale instances are FileOperations that will scale an image to a given
@@ -17,7 +15,7 @@ module FilePipeline
       #
       # Returns a new instance.
       #
-      # ==== Options
+      # ===== Options
       #
       # * +:width+ - The target image width in pixels (_default_ 1024).
       # * +:height+ - The target image height in pixels (_default_ 768).
@@ -31,7 +29,7 @@ module FilePipeline
           height: 768,
           method: :scale_by_bounds
         }
-        super(defaults, opts)
+        super(opts, defaults)
       end
 
       # :args: src_file, out_file

@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'ruby-vips'
-
 module FilePipeline
   module FileOperations
     # Saves a file to a <em>tiled multi-resolution TIFF</em> ('pyramid'), as
@@ -15,7 +13,7 @@ module FilePipeline
       #
       # Returns a new instance.
       #
-      # ==== Options
+      # ===== Options
       #
       # * +:tile+ - Writes a tiled _TIFF_ (_default_ +true+)
       # * +:tile_width+: Tile width in pixels (_default_ +256+)
@@ -26,7 +24,7 @@ module FilePipeline
           tile_width: 256,
           tile_height: 256
         }
-        super(defaults, opts)
+        super(opts, defaults)
         @options[:pyramid] = true
       end
 

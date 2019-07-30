@@ -18,15 +18,20 @@ module FilePipeline
       #
       # Returns a new instance.
       #
-      # ==== Options
+      # ===== Options
       #
       # * <tt>redact_tags</tt> - _Exif_ tags to be deleted.
       #
       def initialize(**opts)
         defaults = { redact_tags: [] }
-        super(defaults, opts)
+        super(opts, defaults)
       end
 
+      # Returns the DROPPED_EXIF_DATA tag defined in CapturedDataTags.
+      #
+      # This operation will capture all _Exif_ tags and their values are
+      # declared in #options <tt>redact_tags</tt> that are redacted from the
+      # file created by the operation.
       def captured_data_tag
         CapturedDataTags::DROPPED_EXIF_DATA
       end

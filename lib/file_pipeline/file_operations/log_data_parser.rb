@@ -14,7 +14,7 @@ module FilePipeline
     #   0
     # * +nil+ or a hash at index 1.
     #
-    # ==== Examples
+    # ===== Examples
     #
     # When passed +nil+:
     #

@@ -24,13 +24,13 @@ module FilePipeline
 
       # Returns a new instance.
       #
-      # ==== Arguments
+      # ===== Arguments
       #
       # * +operation+ - Must respond to +:name+ and +:options+.
       # * +success+ - +true+ or +false+.
       # * +log_data+ - A string, error, array, hash, or +nil+.
       #
-      # ==== Examples
+      # ===== Examples
       #
       #   error = StandardError.new
       #   warning = 'a warning occurred'

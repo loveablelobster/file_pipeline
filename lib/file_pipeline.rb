@@ -7,7 +7,8 @@ require_relative 'file_pipeline/file_operations'
 require_relative 'file_pipeline/versioned_file'
 require_relative 'file_pipeline/pipeline'
 
-# Module that contains classes to build a file processing pipeline.
+# Module that contains classes to build a file processing pipeline that applies
+# a defined batch of file operations non-destructively to a VersionedFile.
 #
 # == Usage:
 # TODO: proper documentation for usage

@@ -26,14 +26,21 @@ module FilePipeline
       #
       # This can be called from subclasses.
       #
-      # ==== Arguments
+      # ===== Arguments
       #
       # * +defaults+ - Default options for the subclass (hash).
       # * +opts+ - Options passed to the sublass initializer (hash).
-      def initialize(defaults, opts)
-        @options = defaults.merge(opts)
+      def initialize(opts, defaults = {})
+        @options = defaults.update(opts)
       end
 
+      # Returns the NO_DATA tag.
+      #
+      # If the results returned by a subclass contain data, override this methos
+      # to return the appropriate tag for the data. This tag can be used to
+      # filter data captured by operations.
+      #
+      # Tags are defined in CapturedDataTags.
       def captured_data_tag
         CapturedDataTags::NO_DATA
       end
@@ -43,7 +50,6 @@ module FilePipeline
       #
       # If the #operation of a subclass will result in a different extension of
       # predictable type, define a #target_extension method.
-      #
       def extension(file)
         target_extension || File.extname(file)
       end
@@ -55,6 +61,8 @@ module FilePipeline
         results false, log_data
       end
 
+      # Returns the class name (string) of +self+ _without_ the names of the
+      # modules that the class is nested in.
       def name
         self.class.name.split('::').last
       end
@@ -64,7 +72,7 @@ module FilePipeline
       # To be implemented in subclasses. Should return any logged errors or data
       # produced (a string, error, array, or hash) or +nil+.
       #
-      # ==== Arguments
+      # ===== Arguments
       #
       # * <tt>src_file</tt> - Path for the file the operation will use as the
       #   basis for the new version it will create.
@@ -79,7 +87,7 @@ module FilePipeline
       # +success+, and any information returned by the operation as
       # <tt>log_data</tt> (a string, error, array, or hash.)
       #
-      # ==== Examples
+      # ===== Examples
       #
       #   error = StandardError.new
       #   warning = 'a warning occurred'
@@ -149,7 +157,7 @@ module FilePipeline
       #
       # The timestamp format is <tt>YYYY-MM-DDTHH:MM:SS.NNNNNNNNN</TT>.
       #
-      # ==== Examples
+      # ===== Examples
       #
       #   file_operation.target('path/to/dir', '.png', :timestamp)
       #   # => 'path/to/dir/2019-07-24T09:30:12:638935761.png'

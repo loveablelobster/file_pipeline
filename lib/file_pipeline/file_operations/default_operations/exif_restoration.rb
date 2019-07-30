@@ -16,7 +16,7 @@ module FilePipeline
       #
       # Returns a new instance.
       #
-      # ==== Options
+      # ===== Options
       #
       # * <tt>skip_tags</tt> - _Exif_ tags to be ignored during restoration.
       #
@@ -26,10 +26,14 @@ module FilePipeline
       # such as file format conversions.
       def initialize(**opts)
         defaults = { skip_tags: [] }
-        super(defaults, opts)
+        super(opts, defaults)
         @options[:skip_tags] += ExifManipulable.file_tags
       end
 
+      # Returns the DROPPED_EXIF_DATA tag defined in CapturedDataTags.
+      #
+      # This operation will capture any _Exif_ tags and their values that could
+      # not be written to the file created by the operation.
       def captured_data_tag
         CapturedDataTags::DROPPED_EXIF_DATA
       end

@@ -18,7 +18,7 @@ module FilePipeline
           origin_x: 10,
           origin_y: 10
         }
-        super(defaults, opts)
+        super(opts, defaults)
       end
 
       # If the file extension is expected to always be the same (for instance
