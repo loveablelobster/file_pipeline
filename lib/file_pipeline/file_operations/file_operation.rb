@@ -166,7 +166,7 @@ module FilePipeline
       #   # => 'path/to/dir/123e4567-e89b-12d3-a456-426655440000.png'
       def target(directory, extension, kind = :timestamp)
         filename = FilePipeline.new_basename(kind) + extension
-        File.path Pathname.new(directory).join(filename)
+        File.join directory, filename
       end
 
       # Returns +nil+.

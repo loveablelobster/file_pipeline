@@ -16,14 +16,16 @@ require_relative 'file_pipeline/pipeline'
 # operations that are to be performed, apply it to a VersionedFile object
 # initialized with the image to be processed, and finalize the versioned file.
 #
+#   require 'file_pipeline'
+#
 #   # create a new instance of Pipeline
-#   my_pipeline = Pipeline.new
+#   my_pipeline = FilePipeline::Pipeline.new
 #
 #   # configure an operation to scale an image to 1280 x 960 pixels
 #   my_pipeline.define_operation('scale', :width => 1280, :height => 960)
 #
 #   # create an instance of VersionedFile for the file '~/image.jpg'
-#   image = VersionedFile.new('~/image.jpg')
+#   image = FilePipeline::VersionedFile.new('~/image.jpg')
 #
 #   # apply the pipeline to the versioned file
 #   my_pipeline.apply_to(image)
@@ -256,7 +258,7 @@ module FilePipeline
 
   # Returns a String with the <em>/directory/filename</em>.
   def self.path(dir, filename)
-    File.path Pathname.new(dir).join(filename)
+    File.join dir, filename
   end
 
   # Returns an array of directory paths that may contain source files for

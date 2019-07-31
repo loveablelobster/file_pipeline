@@ -272,7 +272,7 @@ module FilePipeline
     def workdir
       subdir = basename + '_versions'
       filedir = File.dirname(original)
-      dirname = Pathname.new(filedir) / subdir
+      dirname = File.join filedir, subdir
       FileUtils.mkdir(dirname)
       File.path dirname
     end
