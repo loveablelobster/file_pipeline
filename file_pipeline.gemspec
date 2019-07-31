@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
   s.homepage = 'https://github.com/loveablelobster/file_pipeline'
   s.license = 'MIT'
   s.email = 'loveablelobster@fastmail.fm'
-  s.description = File.read(File.join(__dir__, 'README.md'))
+  s.description = File.read(File.join(__dir__, 'README.rdoc'))
   s.add_runtime_dependency('multi_exiftool', '~> 0.11.0')
   s.add_runtime_dependency('ruby-vips', '~> 2.0.14')
 end
