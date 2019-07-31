@@ -30,10 +30,6 @@ module FilePipeline
     # *Caveat* it can not be ruled out that buggy or malignant file operations
     # modify the original.
     #
-    #--
-    # FIXME: protect the original
-    #++
-    #
     # ===== Options
     #
     # <tt>target_suffix</ttm> is a string to be appended to the file that
