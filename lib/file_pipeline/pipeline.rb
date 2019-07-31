@@ -13,9 +13,9 @@ module FilePipeline
   #
   #   Pipeline.new do |pipeline|
   #     pipeline.define_operation('scale',
-  #                               width: 1280, height: 1024)
+  #                               :width => 1280, :height => 1024)
   #     pipeline.define_operation('ptiff_conversion',
-  #                               tile_width: 64, tile_height: 64)
+  #                               :tile_width => 64, :tile_height => 64)
   #   end
   #
   class Pipeline

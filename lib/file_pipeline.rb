@@ -49,38 +49,39 @@ require_relative 'file_pipeline/pipeline'
 # the <tt>:tile_width</tt> and <tt>:tile_height</tt> options each set to 64
 # pixels.
 #
-#   my_pipeline = Pipeline.new
+#   my_pipeline = FilePipeline::Pipeline.new
 #   my_pipeline.define_operation('ptiff_conversion',
 #                                :tile_width => 64, :tile_height => 64)
 #
 # Chaining is possible
 #
-#   my_pipeline = Pipeline.new
-#   my_pipeline.define_operation('scale', width: 1280, height: 1024)
+#   my_pipeline = FilePipeline::Pipeline.new
+#   my_pipeline.define_operation('scale', :width => 1280, :height => 1024)
 #              .define_operation('exif_restoration')
 #
-# Alternatively, the operations can be defined during initialization by passing
-# a block to Pipeline.new.
+# Alternatively, operations can be defined during initialization by passing a
+# block to Pipeline.new.
 #
-#   my_pipeline = Pipeline.new do |pipeline|
-#     pipeline.define_operation('scale', width: 1280, height: 1024)
+#   my_pipeline = FilePipeline::Pipeline.new do |pipeline|
+#     pipeline.define_operation('scale', :width => 1280, :height => 1024)
 #     pipeline.define_operation('exif_restoration')
 #   end
 #
 # When using the default operations included in the gem, it is sufficient to
 # call Pipeline#define_operation with the desired operations and options.
 #
-# ==== Using custom FileOperations
+# ==== Using custom file operations
 #
 # When file operations are to be used that are not included in the gem, place
 # the source files for the class definitions in one or more directories and
-# initialize the Pipeline object with the directory paths.
+# initialize the Pipeline object with the directory paths. The directories will
+# be added to the FilePipeline.source_directories.
 #
-# Directories are added to FilePipeline.source_directories in reverse order, so
-# that directories added later will have precedence over earlier ones when
-# source files are searched. The default operations included in the gem will
-# looked up last. This allows for overriding of operations without changing the
-# code in exsisting classes.
+# Directories are added to the source directories in reverse order, so that
+# directories added later will have precedence when searching source files. The
+# default operations directory included in the gem will be searched last. This
+# allows for overriding of operations without changing the code in exsisting
+# classes.
 #
 # If, for example, there are two directories with custom file operation classes,
 # <tt>'~/custom_operations'</tt> and <tt>'~/other_operations'</tt>, the new
@@ -89,12 +90,12 @@ require_relative 'file_pipeline/pipeline'
 # finally in the included default operations.
 #
 # The basename for source files _must_ be the class name in underscore notation
-# without the containing module name.
+# without the containing module name. If, for example, the operation is
+# <tt>FileOperations::MyOperation</tt>, the source file basename should be
+# <tt>'my_operation.rb'</tt>
 #
-# If, for instance, the operation is <tt>FileOperations::MyOperation</tt>,
-# the source file should be <tt>'my_operation.rb'</tt>
-#
-#   my_pipeline = Pipeline.new('~/custom_operations', '~/other_operations')
+#   my_pipeline = FilePipeline::Pipeline.new('~/custom_operations',
+#                                            '~/other_operations')
 #   my_pipeline.define_operation('my_operation')
 #
 # Instructions for how to write file operations are provided in the
@@ -105,17 +106,14 @@ require_relative 'file_pipeline/pipeline'
 # Pipeline instances work on instances of VersionedFile, which allows for
 # non-destructive application of all file operations.
 #
-# VersionedFile instances are created by calling VersionedFile.new with the
-# path of the file to work with.
-#
 #   # create an instance of VersionedFile for the file '~/image.jpg'
-#   image = VersionedFile.new('~/image.jpg')
+#   image = FilePipeline::VersionedFile.new('~/image.jpg')
 #
 # As long as no operations have been applied, this will have no effect in the
 # file system. Only when the first operation is applied will VersionedFile
 # create a working directory in the same directory as the original file. The
-# working directory will have the basename of the file basename without
-# extension and the suffix <tt>'_versions'</tt>.
+# working directory will have the name of the file basename without extension
+# and the suffix <tt>'_versions'</tt> added.
 #
 # For further details, refer to the VersionedFile documentaion.
 #
@@ -127,13 +125,13 @@ require_relative 'file_pipeline/pipeline'
 #
 # === Accessing file metadata and captured data.
 #
-# *Caveat*: this currently only works for _Exif_ metadata of image files.
+# *Limitations*: this currently only works for _Exif_ metadata of image files.
 #
 # VersionedFile provides access to a files metadata via VersionedFile#metadata.
 # Both the metadata for the original file and the current (latest) version can
-# be accessed.
+# be accessed:
 #
-#   image = VersionedFile.new('~/image.jpg')
+#   image = FilePipeline::VersionedFile.new('~/image.jpg')
 #
 #   # access the metadata for the current version
 #   image.metadata
@@ -147,31 +145,32 @@ require_relative 'file_pipeline/pipeline'
 # <tt>:original</tt>:
 #
 #   # access the metadata for the original file
-#   image.metadata(for_version: :original)
+#   image.metadata(:for_version => :original)
 #
-# Some file operations can comprise metadata (delete elements). Many image
-# processing libraries will not preserve all _Exif_ tags and their values, but
-# only write a small subset of tags to the file they create. In these cases,
-# the FileOperations::ExifRestoration operation can try to restore the tags that
-# have been discarded, but it can not write all tags. It will store all data
-# that it could not write back to the file and return it as captured data.
+# Some file operations can comprise metadata; many image processing libraries
+# will not preserve all _Exif_ tags and their values when converting images to
+# a different format, but only write a small subset of tags to the file they
+# create. In these cases, the FileOperations::ExifRestoration operation can be
+# used to try to restore the tags that have been discarded, but it can not write
+# all tags. It will store all tags and their values that it could not write back
+# to the file and return them as captured data.
 #
 # Likewise, if the FileOperations::ExifRedaction is applied to delete sensitive
-# tags (e.g. GPS location data), it will return all deleted exif tag-value-pairs
-# as captured data.
+# tags (e.g. GPS location data), it will return all deleted exif tags and their
+# values as captured data.
 #
-# VersionedFile#recovered_metadata is a shorthand to retrieve a hash with all
-# metadata that was deleted or could not be restored by operations.
+# VersionedFile#recovered_metadata will return a hash with all metadata that was
+# deleted or could not be restored by operations:
 #
 #   delete_tags = ['CreatorTool', 'Software']
 #
-#   my_pipeline = Pipeline.new do |pipeline|
+#   my_pipeline = FilePipeline::Pipeline.new do |pipeline|
 #     pipeline.define_operation('scale', width: 1280, height: 1024)
 #     pipeline.define_operation('exif_restoration')
 #     Pipeline.define_operation('exif_redaction', :redact_tags => delete_tags)
 #   end
 #
-#   image = VersionedFile.new('~/image.jpg')
+#   image = FilePipeline::VersionedFile.new('~/image.jpg')
 #   my_pipeline.apply_to(image)
 #
 #   image.recovered_metadata
@@ -191,7 +190,7 @@ require_relative 'file_pipeline/pipeline'
 # option for the method is passed with +true+, it will delete the original and
 # write the final version to the same basename as the original.
 #
-#   image = VersionedFile.new('~/image.jpg')
+#   image = FilePipeline::VersionedFile.new('~/image.jpg')
 #
 #   # finalize the versioned file, preserving the original
 #   image.finalize
