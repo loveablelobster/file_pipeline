@@ -1,8 +1,515 @@
-# file_pipeline
-Applies batch of file operations to file
+= file_pipeline
 
-## Dependencies
+The <tt>file_pipeline</tt> gem provides a framework for nondestructive 
+application of file operation batches to files.
 
-pyramid tiff generation depends on [libvips](https://libvips.github.io/libvips/)
+== Installation
 
-Exif operations (preservation of Exif data during file conversions and returning Exif data as JSON) depend on [Exiftool](https://www.sno.phy.queensu.ca/~phil/exiftool/)
+  gem install file_pipeline
+
+== Dependencies
+
+The file operations included in the gem require 
+{ruby-vips}[https://github.com/libvips/ruby-vips] for image manipulation and
+{multi_exiftool}[https://github.com/janfri/multi_exiftool] for image file
+metdata extraction and manipulation.
+
+While these dependencies should be installed automatically with the gem, 
+ruby-vips depends on {libvips}[https://libvips.github.io/libvips/], and
+multi_exiftool depends on
+{Exiftool}[https://www.sno.phy.queensu.ca/~phil/exiftool/], which will not be
+installed automatically.
+
+== Usage
+
+The basic usage is to create a new FilePipeline::Pipeline object and define any
+file operations that are to be performed, apply it to a 
+FilePipeline::VersionedFile object initialized with the image to be processed,
+then finalize the versioned file.
+
+  require 'file_pipeline'
+
+  # create a new instance of Pipeline
+  my_pipeline = FilePipeline::Pipeline.new
+
+  # configure an operation to scale an image to 1280 x 960 pixels
+  my_pipeline.define_operation('scale', :width => 1280, :height => 960)
+
+  # create an instance of VersionedFile for the file '~/image.jpg'
+  image = FilePipeline::VersionedFile.new('~/image.jpg')
+
+  # apply the pipeline to the versioned file
+  my_pipeline.apply_to(image)
+
+  # finalize the versioned file, replacing the original
+  image.finalize(:overwrite => true)
+
+=== Setting up a Pipeline
+
+Pipeline objects can be set up to contain default file operations included in
+the gem or with custom file operations (see
+{Custom file operations}[rdoc-label:label-Custom+file+operations] for
+instructions on how to create custom operations).
+
+==== Basic set up with default operations
+
+To define an operation, pass the class name of the operation in underscore
+notation and without the containing module name, and any options to
+{#define_operation}[rdoc-ref:FilePipeline::Pipeline#define_operation].
+
+The example below adds an instance of 
+PtiffConversion[rdoc-ref:FilePipeline::FileOperations::PtiffConversion] with
+the <tt>:tile_width</tt> and <tt>:tile_height</tt> options each set to 64
+pixels.
+
+  my_pipeline = FilePipeline::Pipeline.new
+  my_pipeline.define_operation('ptiff_conversion',
+                               :tile_width => 64, :tile_height => 64)
+
+Chaining is possible
+
+  my_pipeline = FilePipeline::Pipeline.new
+  my_pipeline.define_operation('scale', :width => 1280, :height => 1024)
+             .define_operation('exif_restoration')
+
+Alternatively, operations can be defined during initialization by passing a
+block to {#new}[rdoc-ref:FilePipeline::Pipeline.new].
+
+  my_pipeline = FilePipeline::Pipeline.new do |pipeline|
+    pipeline.define_operation('scale', :width => 1280, :height => 1024)
+    pipeline.define_operation('exif_restoration')
+  end
+
+When using the default operations included in the gem, it is sufficient to
+call <tt>#define_operation</tt> with the desired operations and options.
+
+==== Using custom file operations
+
+When file operations are to be used that are not included in the gem, place
+the source files for the class definitions in one or more directories and
+initialize the Pipeline object with the directory paths. The directories will
+be added to the {source directories}[rdoc-ref:FilePipeline.source_directories].
+
+Directories are added to the source directories in reverse order, so that
+directories added later will have precedence when searching source files. The
+default operations directory included in the gem will be searched last. This
+allows overriding of operations without changing the code in existing classes.
+
+If, for example, there are two directories with custom file operation classes,
+<tt>'~/custom_operations'</tt> and <tt>'~/other_operations'</tt>, the new
+instance of Pipeline can be set up to look for source files first in
+<tt>'~/other_operations'</tt>, then in <tt>'~/custom_operations'</tt>, and
+finally in the included default operations.
+
+The basename for source files _must_ be the class name in underscore notation
+without the containing module name. If, for example, the operation is
+<tt>FileOperations::MyOperation</tt>, the source file basename should be
+<tt>'my_operation.rb'</tt>
+
+  my_pipeline = FilePipeline::Pipeline.new('~/custom_operations',
+                                           '~/other_operations')
+  my_pipeline.define_operation('my_operation')
+
+See {Custom file operations}[rdoc-label:label-Custom+file+operations] for 
+instructions for how to write file operations.
+
+=== Nondestructive application to files
+
+Pipelines[rdoc-ref:FilePipeline::Pipeline] work on 
+{versioned files}[rdoc-ref:FilePipeline::VersionedFile], which allow for
+non-destructive application of all file operations.
+
+To create a versioned file, initialize an instance with the path to the 
+original file:
+
+  # create an instance of VersionedFile for the file '~/image.jpg'
+  image = FilePipeline::VersionedFile.new('~/image.jpg')
+
+As long as no operations have been applied, this will have no effect in the
+file system. Only when the first operation is applied will VersionedFile
+create a {working directory}[rdoc-ref:FilePipeline::VersionedFile#directory] in
+the same directory as the original file. The working directory will have the
+name of the file basename without extension and the suffix <tt>'_versions'</tt>
+added.
+
+Pipelines can be applied to a singe versioned file with the
+the {#apply_to}[rdoc-ref:FilePipeline::Pipeline#apply_to] method of the pipeline
+instance, or to an array of versioned files with the
+{#batch_apply}[rdoc-ref:FilePipeline::Pipeline#batch_apply] method of the 
+pipeline instance.
+
+=== Accessing file metadata and captured data.
+
+*Limitations*: this currently only works for _Exif_ metadata of image files.
+
+VersionedFile provides access to a files metadata via the
+{#metadata}[rdoc-ref:FilePipeline::VersionedFile#metadata] method of the 
+versioned file instance.
+
+Both the metadata for the original file and the current (latest) version can
+be accessed:
+
+  image = FilePipeline::VersionedFile.new('~/image.jpg')
+
+  # access the metadata for the current version
+  image.metadata
+
+Note that if no file operations have been applied by a pipeline object, this
+will return the metadata for the original, which in that case is the current
+(latest) version.
+
+To explicitly get the metadata for the original file even if there are newer
+versions available, pass the <tt>:for_version</tt> option with the symbol
+<tt>:original</tt>:
+
+  # access the metadata for the original file
+  image.metadata(:for_version => :original)
+
+Some file operations can comprise metadata; many image processing libraries
+will not preserve all _Exif_ tags and their values when converting images to
+a different format, but only write a small subset of tags to the file they
+create. In these cases, the 
+{ExifRestoration}[rdoc-ref:FilePipeline::FileOperations::ExifRestoration]
+operation can be used to try to restore the tags that have been discarded, but
+it can not write all tags. It will store all tags and their values that it could 
+not write back to the file and return them as captured data.
+
+Likewise, if the 
+{ExifRedaction}[rdoc-ref:FilePipeline::FileOperations::ExifRedaction] is applied
+to delete sensitive tags (e.g. GPS location data), it will return all deleted 
+exif tags and their values as captured data.
+
+The
+{#recovered_metadata}[rdoc-ref:FilePipeline::VersionedFile#recovered_metadata]
+of the versioned file instance will return a hash with all metadata that was
+deleted or could not be restored by operations:
+
+  delete_tags = ['CreatorTool', 'Software']
+
+  my_pipeline = FilePipeline::Pipeline.new do |pipeline|
+    pipeline.define_operation('scale', width: 1280, height: 1024)
+    pipeline.define_operation('exif_restoration')
+    Pipeline.define_operation('exif_redaction', :redact_tags => delete_tags)
+  end
+
+  image = FilePipeline::VersionedFile.new('~/image.jpg')
+  my_pipeline.apply_to(image)
+
+  image.recovered_metadata
+
+For information on retrieving other kinds of captured data, refer to
+the versioned file instance methods
+{#captured_data}[rdoc-ref:FilePipeline::VersionedFile#captured_data],
+{#captured_data_for}[rdoc-ref:FilePipeline::VersionedFile#captured_data_for], 
+and
+{#captured_data_with}[rdoc-ref:FilePipeline::VersionedFile#captured_data_with].
+
+=== Finalizing files
+
+Once all file operations of a pipeline object have been applied to a
+versioned file object, it can be finalized by calling the
+{#finalize}[rdoc-ref:FilePipeline::VersionedFile#finalize] method of the
+instance.
+
+Finalization will write the current version to the same directory that
+contains the original. It will by default preserve the original by adding
+a suffix to the basename of the final version. If the <tt>:overwrite</tt>
+option for the method is passed with +true+, it will delete the original and
+write the final version to the same basename as the original.
+
+  image = FilePipeline::VersionedFile.new('~/image.jpg')
+
+  # finalize the versioned file, preserving the original
+  image.finalize
+
+  # finalize the versioned file, replacing the original
+  image.finalize(:overwrite => true)
+
+The work directory with all other versions will be deleted after the final
+version has been written.
+
+== Custom file operations
+
+=== Module nesting
+
+File operation classes _must_ be defined in the FilePipeline::FileOperations
+module for {automatic requiring}[rdoc-ref:FilePipeline.load] of source files to
+work.
+
+=== Implementing from scratch
+
+==== Initializer
+
+The <tt>#initialize</tt> method _must_ take an +options+ argument (a hash
+with a default value, or a <em>double splat</em>) and _must_ be exposed
+through an <tt>#options</tt> getter method.
+
+The options passed can be any for the file operation to properly configure
+a specific instance of a method.
+
+This requirement is imposed by the 
+{#define_operation}[rdoc-ref:FilePipeline::Pipeline#define_operation] instance
+method of Pipeline, which will automatically load and initialize an instance of
+the file operation with any options provided as a hash.
+
+===== Examples
+
+  class MyOperation
+    attr_reader :options
+
+    # initializer with a default
+    def initialize(options = {})
+      @options = options
+    end
+  end
+
+  class MyOperation
+    attr_reader :options
+
+    # initializer with a double splat
+    def initialize(**options)
+      @options = options
+    end
+  end
+
+Consider a file operation +CopyrightNotice+ that whill add copyright
+information to an image file's _Exif_ metadata, the value for the copyright
+tag could be passed as an option.
+
+ copyright_notice = CopyrightNotice.new(:copyright => 'The Photographer')
+
+==== The <tt>run</tt> method
+
+File operations _must_ implement a <tt>#run</tt> method that takes three
+arguments (or a _splat_) in order to be used in a Pipeline.
+
+===== Arguments
+
+The three arguments required for implementations of <tt>#run</tt> are:
+* the path to the <em>file to be modified</em>
+* the path to the _directory_ to which new files will be saved.
+* the path to the <em>original file</em>, from which the first version in a
+  succession of modified versions has been created.
+
+The <em>original file</em> will only be used by file operations that require
+it for reference, e.g. to restore file metadata that was compromised by
+other file operations.
+
+===== Return value
+
+The method _must_ return the path to the file that was created by the
+operation (perferrably in the _directory_). It _may_ also return a 
+{Results}[rdoc-ref:FilePipeline::FileOperations::Results] object, containing the
+operation itself, a _success_ flag (+true+ or +false+), and any logs or data
+returned by the operation.
+
+If results are returned with the path to the created file, both values must
+be wrapped in an array, with the path as the first element, the results as
+the second.
+
+===== Example
+
+  def run(src_file, directory, original)
+    # make a path to which the created file will be written
+    out_file = File.join(directory, 'new_file_name.extension')
+
+    # create a Results object reporting success with no logs or data
+    results = Results.new(self, true, nil)
+
+    # create a new out_file based on src_file in directory
+    # ...
+
+    # return the path to the new file and the results object
+    [out_file, results]
+  end
+
+==== Captured data tags
+
+Captured data tags can be used to
+{filter captured data}[rdoc-ref:FilePipeline::VersionedFile#captured_data_with] 
+accumulated during successive file operations.
+
+Operations that return data as part of the results _should_ respond to
+<tt>:captured_data_tag</tt> and return one of the 
+{tag constants}[rdoc-ref:FilePipeline::FileOperations::CapturedDataTags].
+
+===== Example
+
+  # returns NO_DATA
+  def captured_data_tag
+    CapturedDataTags::NO_DATA
+  end
+
+=== Subclassing FileOperation
+
+The {FileOperation}[rdoc-ref:FilePipeline::FileOperations::FileOperation] class
+is an abstract superclass that provides a scaffold to facilitate the creation of
+file operations that conform to the requirements.
+
+It implements a 
+{#run}[rdoc-ref:FilePipeline::FileOperations::FileOperation#run] method, that
+takes the required three arguments and returns the path to the newly created
+file and a Results object.
+
+When the operation was successful,
+{success}[rdoc-ref:FilePipeline::FileOperations::Results#success] will be
++true+. When an exception was raised, that exeption will be rescued and returned
+as the {log}[rdoc-ref:FilePipeline::FileOperations::Results#log], and
+{success}[rdoc-ref:FilePipeline::FileOperations::Results#success] will be 
++false+.
+
+The standard <tt>#run</tt> method of the FileOperation class does not contain
+logic to perform the actual file operation, but will call an 
+{#operation method}[rdoc-label:label-The+operation+method] that _must_ be
+defined in the subclass unless the subclass overrides the <tt>#run</tt> method.
+
+The <tt>#run</tt> method will generate the new path that is passed to the
+<tt>#operation</tt> method, and to which the latter will write the new
+version of the file. The new file path will need an appropriate file type
+extension. The default behavior is to assume that the extension will be the
+same as for the file that was passed in as the basis from which the new
+version will be created. If the operation will result in a different file
+type, the subclass _should_ define a <tt>#target_extension</tt> method that
+returns the appropriate file extension (see
+{Target file extensions}[rdoc-label:label-Target+file+extensions]).
+
+==== Initializer
+
+The +initialize+ method _must_ take an +options+ argument (a hash with a
+default value or a <em>double splat</em>).
+
+===== Options and defaults
+
+The initializer can call +super+ and pass the +options+ hash and any
+defaults (a hash with default options). This will update the defaults with
+the actual options passed to +initialize+ and assign them to the
+{#options}[rdoc-ref:FilePipeline::FileOperations::FileOperation#options] 
+attribute.
+
+If the initializer does not call +super+, it _must_ assign the options to
+the <tt>@options</tt> instance variable or expose them through an
+<tt>#options</tt> getter method.
+
+If it calls +super+ but must ensure some options are always set to a
+specific value, those should be set after the call to +super+.
+
+===== Examples
+
+  # initializer without defaults callings super
+  def initialize(**options)
+    super(options)
+  end
+
+  # initializer with defaults calling super
+  def initialize(**options)
+    defaults = { :option_a => true, :option_b => false }
+    super(options, defaults)
+  end
+
+  # initializer with defaults calling super, ensures :option_c => true
+  def initialize(**options)
+    defaults = { :option_a => true, :option_b => false }
+    super(options, defaults)
+    @options[:option_c] = true
+  end
+
+  # initilizer that does not call super
+  def initialize(**options)
+    @options = options
+  end
+
+==== The <tt>operation</tt> method
+
+The <tt>#operation</tt> method contains the logic specific to a given
+subclass of FileOperation and must be defined in that subclass unless the
+<tt>#run</tt> method is overwritten.
+
+===== Arguments
+
+The <tt>#operation</tt> method must accept three arguments:
+
+* the path to the <em>file to be modified</em>
+* the path for the <em>file to be created</em> by the operation.
+* the path to the <em>original file</em>, from which the first version in a
+  succession of modified versions has been created.
+
+The <em>original file</em> will only be used by file operations that require
+it for reference, e.g. to restore file metadata that was compromised by
+other file operations.
+
+===== Return Value
+
+The method _can_ return anything that can be interpreted by
+{LogDataParser}[rdoc-ref:FilePipeline::FileOperations::LogDataParser],
+including nothing.
+
+It will usually return any log outpout that the logic of <tt>#operation</tt>
+has generated, and/or data captured. If data is captured that is to be used
+later, the subclass should override the <tt>#captured_data_tag</tt> method to
+return the appropriate 
+{tag constant}[rdoc-ref:FilePipeline::FileOperations::CapturedDataTags].
+
+===== Examples
+
+  # creates out_file based on src_file, captures metadata differences
+  # between out_file and original, returns log messages and captured data
+  def operation(src_file, out_file, original)
+    captured_data = {}
+    log_messages = []
+
+    # write the new version based on src_file to out_file
+    # compare metadata of out_file with original, store any differences
+    # in captures_data and append any log messages to log_messages
+
+    [log_messages, captured_data]
+  end
+
+  # takes the third argument for the original file but does not use it
+  # creates out_file based on src_file, returns log messages
+  def operation(src_file, out_file, _)
+    src_file, out_file = args
+    log_messages = []
+
+    # write the new version based on src_file to out_file
+
+    log_messages
+  end
+
+  # takes arguments as a splat and destructures them to avoid having the
+  # unused thirs argumen
+  # creates out_file based on src_file, returns nothing
+  def operation(*args)
+    src_file, out_file = args
+
+    # write the new version based on src_file to out_file
+
+    return
+  end
+
+==== Target file extensions
+
+If the file that the operation creates is of a different type than the file
+the version is based upon, the class _must_ define the
+<tt>#target_extension</tt> method that returns the appropriate file type
+extension.
+
+In most cases, the resulting file type will be predictable (static), and in
+such cases, the method can just return a string with the extension.
+
+An alternative would be to provide the expected extension as an #option
+to the initializer.
+
+===== Examples
+
+  # returns always '.tiff.
+  def target_extension
+    '.tiff'
+  end
+
+  # returns the extension specified in #options +:extension+
+  # my_operation = MyOperation(:extension => '.dng')
+  def target_extension
+    options[:extension]
+  end
+
+:include:specify_cli.rdoc
