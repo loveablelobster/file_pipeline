@@ -511,5 +511,3 @@ to the initializer.
   def target_extension
     options[:extension]
   end
-
-:include:file_pipeline.rdoc
