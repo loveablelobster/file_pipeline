@@ -41,6 +41,8 @@ module FilePipeline
     # preserve the original. It is recommended to use a UUID (_default_) to
     # avoid clashes with other files in the directory.
     def initialize(file, target_suffix: SecureRandom.uuid)
+      raise Errors::MissingVersionFileError, file: file unless File.exist? file
+
       @original = file
       @basename = File.basename(file, '.*')
       @history = {}
@@ -269,6 +271,8 @@ module FilePipeline
 
     # Creates the directory containing all version files. Directory name is
     # composed of the basename plus '_version'.
+    #
+    # Raises SystemCallError if the directory already exists.
     def workdir
       subdir = basename + '_versions'
       filedir = File.dirname(original)
