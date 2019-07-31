@@ -512,4 +512,4 @@ to the initializer.
     options[:extension]
   end
 
-:include:specify_cli.rdoc
+:include:file_pipeline.rdoc
