@@ -31,6 +31,7 @@ module FilePipeline
       # * +defaults+ - Default options for the subclass (hash).
       # * +opts+ - Options passed to the sublass initializer (hash).
       def initialize(opts, defaults = {})
+        opts.transform_keys!(&:to_sym)
         @options = defaults.update(opts)
       end
 

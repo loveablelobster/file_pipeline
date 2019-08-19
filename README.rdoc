@@ -384,11 +384,11 @@ The initializer can call +super+ and pass the +options+ hash and any
 defaults (a hash with default options). This will update the defaults with
 the actual options passed to +initialize+ and assign them to the
 {#options}[rdoc-ref:FilePipeline::FileOperations::FileOperation#options] 
-attribute.
+attribute. It will also transform any keys passed as strings into symbols.
 
 If the initializer does not call +super+, it _must_ assign the options to
 the <tt>@options</tt> instance variable or expose them through an
-<tt>#options</tt> getter method.
+<tt>#options</tt> getter method. It _should_ transform keys into symbols.
 
 If it calls +super+ but must ensure some options are always set to a
 specific value, those should be set after the call to +super+.
