@@ -58,6 +58,14 @@ module FilePipeline
       end
 
       it { expect(redacted.last.log).to be_nil }
+
+      context 'when deleting tags that do not exist in the file' do
+        let(:tags) { %w[GPSLatitude GPSLongitude] }
+
+        it do
+          expect(redacted.last.log).to include 'Info: nothing to delete.'
+        end
+      end
     end
   end
 end
