@@ -35,14 +35,9 @@ module FilePipeline
           FileOperations::Results.new info, false, 'Error: Something went wrong'
         end
 
-        let :message do
-          'Kaputt with options {:cannot_work=>true} failed,'\
-          ' log: ["Error: Something went wrong"]'
-        end
-
         it do
           expect { add_failure }
-            .to raise_error Errors::FailedModificationError, message
+            .to raise_error Errors::FailedModificationError
         end
       end
 

@@ -34,9 +34,9 @@ module FilePipeline
     #
     # <tt>target_suffix</ttm> is a string to be appended to the file that
     # will be written by #finalize (the last version) if #finalize is to
-    # preserve the original. It is recommended to use a UUID (_default_) to
-    # avoid clashes with other files in the directory.
-    def initialize(file, target_suffix: SecureRandom.uuid)
+    # preserve the original. It is recommended to use a randomized string
+    # (_default_) to avoid clashes with other files in the directory.
+    def initialize(file, target_suffix: SecureRandom.hex(4))
       raise Errors::MissingVersionFileError, file: file unless File.exist? file
 
       @original = file
@@ -68,8 +68,9 @@ module FilePipeline
     # Will move the file to #directory if it is in another directory.
     def <<(version_info)
       file, info = version_info
-      raise Errors::FailedModificationError, info: info if info&.failure
-
+      if info&.failure
+        raise Errors::FailedModificationError, info: info, file: original
+      end
       version = validate(file)
       @history[version] = info
       self
