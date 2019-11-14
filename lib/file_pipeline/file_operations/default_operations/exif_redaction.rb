@@ -33,7 +33,7 @@ module FilePipeline
       # declared in #options <tt>redact_tags</tt> that are redacted from the
       # file created by the operation.
       def captured_data_tag
-        CapturedDataTags::DROPPED_EXIF_DATA
+        CapturedDataTags::REDACTED_EXIF_DATA
       end
 
       # :args: src_file, out_file

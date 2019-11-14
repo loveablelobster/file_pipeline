@@ -11,6 +11,10 @@ module FilePipeline
       # Tag for operations that return _Exif_ metadata that has not been
       # preserved (by accident or intention) in a file.
       DROPPED_EXIF_DATA = :dropped_exif_data
+
+      # Tag for operations that return _Exif_ metadata that has been removed
+      # intentionally from a file.
+      REDACTED_EXIF_DATA = :redacted_exif_data
     end
   end
 end

@@ -109,11 +109,8 @@ module FilePipeline
     def captured_data_with(tag)
       return unless changed?
 
-      captured_data.map do |operation, results|
-        next unless operation.captured_data_tag == tag
-
-        results
-      end
+      captured_data.select { |operation, _| operation.captured_data_tag == tag }
+                   .map(&:last)
     end
 
     # Returns +true+ if there are #versions (file has been modified).

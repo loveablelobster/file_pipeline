@@ -174,11 +174,7 @@ module FilePipeline
           pipeline.apply_to versioned_file
         end
 
-        let :include_expected_values do
-          include non_writable_tags,
-                  a_hash_including('Software' => 'Flying Meat Acorn 6.0.3',
-                                   'CreatorTool' => 'Flying Meat Acorn 6.0.3')
-        end
+        let :include_expected_values { include non_writable_tags }
 
         after { FileUtils.rm_r exampledir1 if File.exist? exampledir1 }
 
@@ -454,9 +450,7 @@ module FilePipeline
             'FOV' => '22.6 deg',
             'FocalLength35efl' => '45.0 mm (35 mm equivalent: 90.0 mm)',
             'HyperfocalDistance' => '16.85 m',
-            'LightValue' => 10.0,
-            'Software' => 'Flying Meat Acorn 6.0.3',
-            'CreatorTool' => 'Flying Meat Acorn 6.0.3'
+            'LightValue' => 10.0
           }
         end
 
