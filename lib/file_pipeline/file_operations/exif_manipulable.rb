@@ -28,6 +28,8 @@ module FilePipeline
         exif, = read_exif out_file
         values = exif.select { |tag| tags_to_delete.include? tag }
         values_to_delete = values.transform_values { nil }
+        return 'Info: nothing to delete.' if values.empty?
+
         log, = write_exif out_file, values_to_delete
         [log, values]
       end

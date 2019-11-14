@@ -59,6 +59,12 @@ module FilePipeline
     def batch_apply(versioned_files)
       versioned_files.map { |file| Thread.new(file) { apply_to(file) } }
                      .map(&:value)
+    #--
+    # FIXME: This should obviously not just raise the same error again, but
+    #        rather do someting meaningful.
+    #++
+    rescue Errors::FailedModificationError => e
+      raise e
     end
 
     # Initializes the class for <tt>file_operation</tt> (a string in

@@ -61,7 +61,14 @@ module FilePipeline
     end
 
     context 'when applying or batch applying' do
-      let(:dirs) { [exampledir1, 'spec/support/example2_versions'] }
+      let :dirs do
+        [exampledir1,
+         'spec/support/example2_versions',
+         'spec/support/example3_versions']
+      end
+
+      let(:vfile2) { VersionedFile.new src_file2 }
+      let(:vfile3) { VersionedFile.new src_file3 }
 
       before do
         pipeline.define_operation('scale', width: 1280, height: 1280)
@@ -94,8 +101,6 @@ module FilePipeline
       describe '#batch_apply(*versioned_files)' do
         subject(:batch) { pipeline.batch_apply [vfile1, vfile2] }
 
-        let(:vfile2) { VersionedFile.new src_file2 }
-
         let :expected_results do
           [
             an_object_having_attributes(versions: versions1),
@@ -116,6 +121,22 @@ module FilePipeline
           expect { batch }.to change(vfile1, :versions)
             .from(be_empty).to(versions1)
             .and change(vfile2, :versions).from(be_empty).to versions2
+        end
+      end
+
+      context 'when applied to a file that is not supported' do
+        subject(:apply) { pipeline.apply_to(vfile3) }
+
+        it do
+          expect { apply }.to raise_error Errors::FailedModificationError
+        end
+      end
+
+      context 'when batch applied to files including one unsupported' do
+        subject(:batch) { pipeline.batch_apply [vfile1, vfile3, vfile2] }
+
+        it do
+          expect { batch }.to raise_error Errors::FailedModificationError
         end
       end
     end

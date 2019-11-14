@@ -35,14 +35,9 @@ module FilePipeline
           FileOperations::Results.new info, false, 'Error: Something went wrong'
         end
 
-        let :message do
-          'Kaputt with options {:cannot_work=>true} failed,'\
-          ' log: ["Error: Something went wrong"]'
-        end
-
         it do
           expect { add_failure }
-            .to raise_error Errors::FailedModificationError, message
+            .to raise_error Errors::FailedModificationError
         end
       end
 
@@ -174,7 +169,7 @@ module FilePipeline
           pipeline.apply_to versioned_file
         end
 
-        let :include_expected_values { include non_writable_tags }
+        let(:include_expected_values) { include non_writable_tags }
 
         after { FileUtils.rm_r exampledir1 if File.exist? exampledir1 }
 
