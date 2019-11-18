@@ -27,11 +27,10 @@ module FilePipeline
         super(opts, defaults)
       end
 
-      # Returns the DROPPED_EXIF_DATA tag defined in CapturedDataTags.
+      # Returns the REDACTED_EXIF_DATA tag defined in CapturedDataTags.
       #
-      # This operation will capture all _Exif_ tags and their values are
-      # declared in #options <tt>redact_tags</tt> that are redacted from the
-      # file created by the operation.
+      # This operation will capture _Exif_ tags and their values for any tags
+      # declared in #options <tt>redact_tags</tt>.
       def captured_data_tag
         CapturedDataTags::REDACTED_EXIF_DATA
       end

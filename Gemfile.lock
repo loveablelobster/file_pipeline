@@ -1,3 +1,10 @@
+PATH
+  remote: .
+  specs:
+    file_pipeline (0.0.5)
+      multi_exiftool (~> 0.11.0)
+      ruby-vips (~> 2.0.16)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -34,11 +41,10 @@ PLATFORMS
 
 DEPENDENCIES
   byebug
-  multi_exiftool
+  file_pipeline!
   pry
   pry-byebug
   rspec
-  ruby-vips
 
 BUNDLED WITH
    2.0.2

@@ -132,7 +132,7 @@ the same directory as the original file. The working directory will have the
 name of the file basename without extension and the suffix <tt>'_versions'</tt>
 added.
 
-Pipelines can be applied to a singe versioned file with the
+Pipelines can be applied to a singe versioned file with 
 the {#apply_to}[rdoc-ref:FilePipeline::Pipeline#apply_to] method of the pipeline
 instance, or to an array of versioned files with the
 {#batch_apply}[rdoc-ref:FilePipeline::Pipeline#batch_apply] method of the 
@@ -181,24 +181,26 @@ exif tags and their values as captured data.
 
 The
 {#recovered_metadata}[rdoc-ref:FilePipeline::VersionedFile#recovered_metadata]
-of the versioned file instance will return a hash with all metadata that was
-deleted or could not be restored by operations:
+of the versioned file instance will return a hash with all metadata that could
+not be restored:
 
   delete_tags = ['CreatorTool', 'Software']
 
   my_pipeline = FilePipeline::Pipeline.new do |pipeline|
     pipeline.define_operation('scale', width: 1280, height: 1024)
     pipeline.define_operation('exif_restoration')
-    Pipeline.define_operation('exif_redaction', :redact_tags => delete_tags)
   end
 
   image = FilePipeline::VersionedFile.new('~/image.jpg')
   my_pipeline.apply_to(image)
 
+  # return metadata that could not be restored
   image.recovered_metadata
 
-For information on retrieving other kinds of captured data, refer to
-the versioned file instance methods
+This method will _not_ return data that was intentionally deleted with e.g. the 
+{ExifRedaction}[rdoc-ref:FilePipeline::FileOperations::ExifRedaction] file
+operation. For information on retrieving that, or other kinds of captured data,
+refer to the versioned file instance methods
 {#captured_data}[rdoc-ref:FilePipeline::VersionedFile#captured_data],
 {#captured_data_for}[rdoc-ref:FilePipeline::VersionedFile#captured_data_for], 
 and
