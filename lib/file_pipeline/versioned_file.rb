@@ -71,6 +71,7 @@ module FilePipeline
       if info&.failure
         raise Errors::FailedModificationError, info: info, file: original
       end
+
       version = validate(file)
       @history[version] = info
       self
@@ -147,6 +148,9 @@ module FilePipeline
     # resets the #history to an empty Hash. Returns the path to the written
     # file.
     #
+    # If the optional block is passed, it will be evaluated before the file is
+    # finalized.
+    #
     # ===== Options
     #
     # * +overwrite+ - +true+ or +false+
@@ -154,6 +158,7 @@ module FilePipeline
     #     #basename and the #original will be preserved.
     #   * +true+ - The finalized version will replace the #original.
     def finalize(overwrite: false)
+      yield(self) if block_given?
       filename = overwrite ? replacing_trarget : preserving_taget
       FileUtils.rm original if overwrite
       @original = VersionedFile.copy(current, original_dir, filename)
