@@ -89,6 +89,25 @@ module FilePipeline
             .from(be_falsey).to be_truthy
         end
       end
+
+      context 'when the operation did not modify, there is no version file' do
+        subject :no_modification do
+          versioned_file << [nil]
+        end
+
+        let :no_mod_results do
+          info = OpenStruct.new(name: 'ChangeNot', options: { mod: false })
+          FileOperations::Results.new info, true, 'some log'
+        end
+
+        it do
+          expect { no_modification }.not_to change(versioned_file, :current)
+        end
+
+        it 'adds the results' do
+          expect { no_modification }.to change(versioned_file, :history)
+        end
+      end
     end
 
     describe '#basename' do

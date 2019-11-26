@@ -261,6 +261,8 @@ module FilePipeline
 
     # Validates if file exists and has been stored in #directory.
     def validate(file)
+      return current unless file
+
       raise Errors::MissingVersionFileError, file: file unless File.exist? file
 
       return file if File.dirname(file) == directory
