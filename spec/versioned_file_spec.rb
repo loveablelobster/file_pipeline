@@ -92,7 +92,7 @@ module FilePipeline
 
       context 'when the operation did not modify, there is no version file' do
         subject :no_modification do
-          versioned_file << [nil]
+          versioned_file << [nil, no_mod_results]
         end
 
         let :no_mod_results do
@@ -105,7 +105,7 @@ module FilePipeline
         end
 
         it 'adds the results' do
-          expect { no_modification }.to change(versioned_file, :history)
+          expect { no_modification }.to change(versioned_file, :log)
         end
       end
     end
@@ -350,41 +350,63 @@ module FilePipeline
         end
 
         it do
-          expect(history).to be_a(Hash).and(include a_timestamp_filename)
+          expect(history)
+            .to have_attributes(versions: include(a_timestamp_filename))
           # and an instance of results
         end
       end
     end
 
-    # FIXME: these specs are terrible
     describe '#metadata' do
-      subject(:file_metadata) { versioned_file.metadata }
+      subject :file_metadata do
+        versioned_file.metadata(for_version: version)
+                      .delete_if { |k, _| k == 'FileAccessDate' }
+      end
+      
+      let :original_exif do
+        MultiExiftool.read(src_file1)[0][0]
+                     .to_h
+                     .delete_if { |k, _| k == 'FileAccessDate' }
+      end
+
+      let :final_exif do
+        lambda do
+          result, = MultiExiftool.read versioned_file.current
+          exif_hash = result.first.to_h.transform_values do |val|
+            next val unless File.exist? val.to_s
+
+            File.expand_path val
+          end
+          exif_hash.delete_if { |k, _| k == 'FileAccessDate' }
+        end
+      end
 
       context 'when no modifications have occurred' do
-        let(:original_exif) { MultiExiftool.read(src_file1)[0][0].to_h }
+        let(:version) { :current }
 
-        it do
-          expect(file_metadata.delete_if { |k, _| k == 'FileAccessDate' } )
-            .to eq original_exif.delete_if { |k, _| k == 'FileAccessDate' }
-        end
+        it { expect(file_metadata).to eq original_exif }
       end
 
       context 'when modifications have occurred' do
         before { versioned_file.modify { |src, path| converter.run src, path } }
-
         after { FileUtils.rm_r exampledir1 if File.exist? exampledir1 }
+        
+        context 'when accessing the current version' do
+          let(:version) { :current }
+         
+          it { expect(file_metadata).to eq final_exif.call }
+        end
 
-        it do
-          final_exif = lambda do
-            result, = MultiExiftool.read versioned_file.current
-            result.first.to_h.transform_values do |val|
-              next val unless File.exist? val.to_s
+        context 'when accessing the original version' do
+          let(:version) { :original }
+          
+          it { expect(file_metadata).to eq original_exif }
+        end
 
-              File.expand_path val
-            end
-          end
-          expect(file_metadata.delete_if { |k, _| k == 'FileAccessDate' } )
-            .to eq final_exif.call.delete_if { |k, _| k == 'FileAccessDate' }
+        context 'when accession an arbitrary version by name' do
+          let(:version) { versioned_file.current }
+
+          it { expect(file_metadata).to eq final_exif.call }
         end
       end
     end

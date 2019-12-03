@@ -19,6 +19,35 @@ module FilePipeline
     # by #finalize is not replacing the original.
     attr_reader :target_suffix
 
+    extend Forwardable
+
+    # Returns a two-dimesnional array, where each nested array has two items;
+    # the file operation object and data captured by the operartion (if any).
+    #
+    # <tt>[[description_object, data_or_nil], ...]</tt>
+    delegate captured_data: :history
+
+    # Returns any data captured by <tt>operation_name</tt>.
+    #
+    # If multiple instances of one operation class have modified the file,
+    # pass any +options+ the specific instance of the operation was initialized
+    # with as the optional second argument.
+    delegate captured_data_for: :history
+
+    # Returns an array with all data captured by operations with +tag+.
+    #
+    # Tags are defined in FileOperations::CapturedDataTags
+    delegate captured_data_with: :history
+
+    # Returns an array of triplets (arryas with three items each): the name of
+    # the file operation class (a string), options (a hash), and the actual log
+    # (an array).
+    delegate log: :history 
+
+    # Returns an array with paths to the version files of +self+ (excluding
+    # #original).
+    delegate versions: :history
+
     # Returns a new instance with +file+ as the #original.
     #
     # ===== Arguments
@@ -41,7 +70,7 @@ module FilePipeline
 
       @original = file
       @basename = File.basename(file, '.*')
-      @history = {}
+      @history = History.new
       @directory = nil
       @target_suffix = target_suffix
     end
@@ -78,37 +107,6 @@ module FilePipeline
     rescue StandardError => e
       reset
       raise e
-    end
-
-    # Returns a two-dimesnional array, where each nested array has two items;
-    # the file operation object and data captured by the operartion (if any).
-    #
-    # <tt>[[description_object, data_or_nil], ...]</tt>
-    def captured_data
-      filter_history :data
-    end
-
-    # Returns any data captured by <tt>operation_name</tt>.
-    #
-    # If multiple instances of one operation class have modified the file,
-    # pass any +options+ the specific instance of the operation was initialized
-    # with as the optional second argument.
-    def captured_data_for(operation_name, **options)
-      raw_data = captured_data.filter do |operation, _|
-        operation.name == operation_name &&
-          options.all? { |k, v| operation.options[k] == v }
-      end
-      raw_data.map(&:last)
-    end
-
-    # Returns an array with all data captured by operations with +tag+ has.
-    #
-    # Tags are defined in FileOperations::CapturedDataTags
-    def captured_data_with(tag)
-      return unless changed?
-
-      captured_data.select { |operation, _| operation.captured_data_tag == tag }
-                   .map(&:last)
     end
 
     # Returns +true+ if there are #versions (file has been modified).
@@ -166,14 +164,6 @@ module FilePipeline
       reset
     end
 
-    # Returns an array of triplets (arryas with three items each): the name of
-    # the file operation class (a string), options (a hash), and the actual log
-    # (an array).
-    def log
-      filter_history(:log)
-        .map { |operation, info| [operation.name, operation.options, info] }
-    end
-
     # Returns the Exif metadata
     #
     # ===== Options
@@ -186,10 +176,12 @@ module FilePipeline
     #--
     # TODO: when file is not an image file, this should return other metadata
     # than exif.
-    # TODO: implement the option to return metadata for a specif version index
     #++
     def metadata(for_version: :current)
-      file = public_send for_version
+      if %i[current original].include? for_version
+        file = public_send(for_version)
+      end
+      file ||= for_version
       read_exif(file).first
     end
 
@@ -222,12 +214,6 @@ module FilePipeline
         &.reduce({}) { |recovered, data| recovered.merge data }
     end
 
-    # Returns an array with paths to the version files of +self+ (excluding
-    # #original).
-    def versions
-      history.keys
-    end
-
     alias touch clone
 
     private
@@ -256,7 +242,7 @@ module FilePipeline
     # Deletes the work directory and resets #versions
     def reset
       FileUtils.rm_r directory, force: true
-      @history = {}
+      @history.clear!
     end
 
     # Validates if file exists and has been stored in #directory.
