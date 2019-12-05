@@ -42,7 +42,7 @@ module FilePipeline
     # Returns an array of triplets (arryas with three items each): the name of
     # the file operation class (a string), options (a hash), and the actual log
     # (an array).
-    delegate log: :history 
+    delegate log: :history
 
     # Returns an array with paths to the version files of +self+ (excluding
     # #original).

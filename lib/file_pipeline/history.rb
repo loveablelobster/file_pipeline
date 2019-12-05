@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-require 'pry-byebug'
+
 module FilePipeline
   class History
     def initialize()
@@ -34,7 +34,7 @@ module FilePipeline
       captured_data.filter { |op, _| matches? op, operation_name, options }
         .map(&:last)
     end
-   
+
     # Returns an array with all data captured by operations with +tag+.
     #
     # Tags are defined in FileOperations::CapturedDataTags

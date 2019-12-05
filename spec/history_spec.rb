@@ -38,9 +38,9 @@ module FilePipeline
              operation: operation2,
              succuess: true, log: ['info1', 'info2'], data: nil)
     end
-    
+
     before { history[version1] = results1a }
-    
+
     describe '#[]=' do
       context 'when adding with a new version' do
         subject(:insert_new) { history[version2] = results2 }
