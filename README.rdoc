@@ -147,7 +147,7 @@ VersionedFile provides access to a files metadata via the
 {#metadata}[rdoc-ref:FilePipeline::VersionedFile#metadata] method of the 
 versioned file instance.
 
-Both the metadata for the original file and the current (latest) version can
+Metadata for the original file, the current (latest) or an arbitrary version can
 be accessed:
 
   image = FilePipeline::VersionedFile.new('~/image.jpg')
@@ -168,12 +168,13 @@ versions available, pass the <tt>:for_version</tt> option with the symbol
 
 Some file operations can comprise metadata; many image processing libraries
 will not preserve all _Exif_ tags and their values when converting images to
-a different format, but only write a small subset of tags to the file they
-create. In these cases, the 
+a different format, but only write a subset of tags to the file they create.
+In these cases, the 
 {ExifRestoration}[rdoc-ref:FilePipeline::FileOperations::ExifRestoration]
-operation can be used to try to restore the tags that have been discarded, but
-it can not write all tags. It will store all tags and their values that it could 
-not write back to the file and return them as captured data.
+operation can be used to try to restore the tags that have been discarded. The
+operation uses Exiftool to write tags, and Exiftool will not write all tags.
+It will store any tags and their values that it could not write back to the file
+and return them as captured data.
 
 Likewise, if the 
 {ExifRedaction}[rdoc-ref:FilePipeline::FileOperations::ExifRedaction] is applied
