@@ -70,7 +70,7 @@ module FilePipeline
 
       @original = file
       @basename = File.basename(file, '.*')
-      @history = History.new
+      @history = Versions::History.new
       @directory = nil
       @target_suffix = target_suffix
     end
@@ -218,15 +218,6 @@ module FilePipeline
 
     private
 
-    # item = :data or :log
-    def filter_history(item)
-      history.inject([]) do |results, (_, info)|
-        next results unless info.respond_to?(item) && info.public_send(item)
-
-        results << [info.operation, info.public_send(item)]
-      end
-    end
-
     # Returns the filename for a target file that will not overwrite the
     # original.
     def preserving_taget
@@ -242,7 +233,7 @@ module FilePipeline
     # Deletes the work directory and resets #versions
     def reset
       FileUtils.rm_r directory, force: true
-      @history.clear!
+      history.clear!
     end
 
     # Validates if file exists and has been stored in #directory.

@@ -4,7 +4,7 @@ require 'securerandom'
 
 require_relative 'file_pipeline/errors'
 require_relative 'file_pipeline/file_operations'
-require_relative 'file_pipeline/history'
+require_relative 'file_pipeline/versions'
 require_relative 'file_pipeline/versioned_file'
 require_relative 'file_pipeline/pipeline'
 
