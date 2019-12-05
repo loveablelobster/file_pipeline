@@ -135,7 +135,7 @@ module FilePipeline
         context 'when no modifications have occurred' do
           subject { described_class.new.captured_data_with(:some_data) }
 
-          it { is_expected.to be_nil }
+          it { is_expected.to be_empty }
         end
       end
 
@@ -175,6 +175,13 @@ module FilePipeline
                                  results1b.log],
                                 [operation2.name, operation2.options,
                                  results2.log]
+        end
+      end
+
+      describe '#to_a' do
+        it do
+          expect(history.to_a)
+            .to contain_exactly [version1, [results1a]]
         end
       end
 

@@ -54,7 +54,7 @@ instructions on how to create custom operations).
 ==== Basic set up with default operations
 
 To define an operation, pass the class name of the operation in underscore
-notation and without the containing module name, and any options to
+notation without the containing module name, and any options to
 {#define_operation}[rdoc-ref:FilePipeline::Pipeline#define_operation].
 
 The example below adds an instance of 
@@ -87,8 +87,9 @@ call <tt>#define_operation</tt> with the desired operations and options.
 
 When file operations are to be used that are not included in the gem, place
 the source files for the class definitions in one or more directories and
-initialize the Pipeline object with the directory paths. The directories will
-be added to the {source directories}[rdoc-ref:FilePipeline.source_directories].
+initialize the Pipeline object with the paths to those directories. The
+directories will be added to the
+{source directories}[rdoc-ref:FilePipeline.source_directories].
 
 Directories are added to the source directories in reverse order, so that
 directories added later will have precedence when searching source files. The
@@ -103,7 +104,7 @@ finally in the included default operations.
 
 The basename for source files _must_ be the class name in underscore notation
 without the containing module name. If, for example, the operation is
-<tt>FileOperations::MyOperation</tt>, the source file basename should be
+<tt>FileOperations::MyOperation</tt>, the source file basename has to be
 <tt>'my_operation.rb'</tt>
 
   my_pipeline = FilePipeline::Pipeline.new('~/custom_operations',

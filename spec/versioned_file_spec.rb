@@ -50,7 +50,7 @@ module FilePipeline
 
         it do
           expect { add_version }.to change(versioned_file, :versions)
-            .from(be_empty).to include stored
+            .from(a_collection_excluding(stored)).to include stored
         end
 
         it do
@@ -73,7 +73,7 @@ module FilePipeline
 
         it do
           expect { add_version }.to change(versioned_file, :versions)
-            .from(be_empty).to include version
+            .from(a_collection_excluding(version)).to include version
         end
 
         it do
@@ -173,7 +173,7 @@ module FilePipeline
       end
 
       context 'when no modifications have occurred' do
-        it { is_expected.to be_nil }
+        it { is_expected.to be_empty }
       end
 
       context 'when modifications have occurred' do
@@ -213,10 +213,14 @@ module FilePipeline
     describe '#clone' do
       subject(:clone) { versioned_file.clone }
 
+      let(:version) do
+        a_timestamp_filename & ending_with('.jpg')
+      end
+      
       it do
         expect { clone }.to change(versioned_file, :versions)
-          .from(be_empty)
-          .to include a_timestamp_filename & ending_with('.jpg')
+          .from(a_collection_excluding(version))
+          .to include version
       end
 
       it 'creates a directory with the name <filename>_versions' do
@@ -339,7 +343,7 @@ module FilePipeline
       subject { versioned_file.history }
 
       context 'when no modifications have occurred' do
-        it { is_expected.to be_empty }
+        it { is_expected.to contain_exactly [versioned_file.original, []] }
       end
 
       context 'when modifications have occurred' do
@@ -417,10 +421,14 @@ module FilePipeline
           versioned_file.modify { |src, path| converter.run src, path }
         end
 
+        let(:version) do
+          a_timestamp_filename & ending_with('.tiff')
+        end
+
         it do
           expect { modify }.to change(versioned_file, :versions)
-            .from(be_empty)
-            .to include a_timestamp_filename & ending_with('.tiff')
+            .from(a_collection_excluding(version))
+            .to include version
         end
 
         it 'creates a directory with the name <filename>_versions' do
@@ -500,7 +508,7 @@ module FilePipeline
       subject { versioned_file.versions }
 
       context 'when no modifications or cloning have occurred' do
-        it { is_expected.to be_empty }
+        it { is_expected.to contain_exactly versioned_file.original }
       end
 
       context 'when modifications or cloning have occurred' do

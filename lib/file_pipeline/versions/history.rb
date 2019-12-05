@@ -19,7 +19,7 @@ module FilePipeline
       def []=(version_name, results)
         entry = @entries.fetch version_name, []
         entry << results
-        @entries[version_name] = entry
+        @entries[version_name] = entry.compact
       end
 
       # Returns a two-dimensional array, where each nested array has two items:
@@ -45,12 +45,9 @@ module FilePipeline
 
       # Returns an array with all data captured by operations with +tag+.
       # Returns an empty array if there is no data for +tag+.
-      # Returns +nil+ if the history is empty.
       #
       # Tags are defined in FileOperations::CapturedDataTags
       def captured_data_with(tag)
-        return if empty?
-
         captured_data.filter { |op, _| op.captured_data_tag == tag }
                      .map(&:last)
       end
@@ -72,6 +69,15 @@ module FilePipeline
       #  * The log (Array).
       def log
         filter(:log).map { |op, results| [op.name, op.options, results] }
+      end
+
+      # Returns a two-dimensional Array where every nested Array will consist
+      # of the version name (file path) at index +0+ and +nil+ or an Array with
+      # all _results_ objects for the version at index +1+:
+      #
+      # <tt>[version_name, [results1, ...]]</tt>
+      def to_a
+        @entries.to_a
       end
 
       # Returns an array with paths to the version files of +self+ (excluding

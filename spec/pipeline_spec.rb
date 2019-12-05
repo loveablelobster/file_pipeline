@@ -12,7 +12,8 @@ module FilePipeline
     let(:vfile1) { VersionedFile.new src_file1 }
 
     let :versions1 do
-      contain_exactly(a_timestamp_filename & end_with('.jpg'),
+      contain_exactly(end_with('.jpg'),
+                      a_timestamp_filename & end_with('.jpg'),
                       a_timestamp_filename & end_with('.jpg'),
                       a_timestamp_filename & end_with('.tiff'),
                       a_timestamp_filename & end_with('.tiff'))
@@ -85,7 +86,7 @@ module FilePipeline
 
         it do
           expect { apply }.to change(vfile1, :versions)
-            .from(be_empty).to versions1
+            .from(contain_exactly(vfile1.original)).to versions1
         end
 
         it 'creates a final version that is the same as'\
@@ -109,7 +110,8 @@ module FilePipeline
         end
 
         let :versions2 do
-          contain_exactly(a_timestamp_filename & end_with('.tif'),
+          contain_exactly(end_with('.tif'),
+                          a_timestamp_filename & end_with('.tif'),
                           a_timestamp_filename & end_with('.tif'),
                           a_timestamp_filename & end_with('.tiff'),
                           a_timestamp_filename & end_with('.tiff'))
@@ -119,8 +121,9 @@ module FilePipeline
 
         it do
           expect { batch }.to change(vfile1, :versions)
-            .from(be_empty).to(versions1)
-            .and change(vfile2, :versions).from(be_empty).to versions2
+            .from(contain_exactly(vfile1.original)).to(versions1)
+            .and change(vfile2, :versions)
+            .from(contain_exactly(vfile2.original)).to versions2
         end
       end
 

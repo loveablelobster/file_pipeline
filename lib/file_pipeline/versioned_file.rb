@@ -73,6 +73,7 @@ module FilePipeline
       @history = Versions::History.new
       @directory = nil
       @target_suffix = target_suffix
+      history[original] = nil
     end
 
     # Adds a new version to #history and returns _self_.
@@ -196,6 +197,7 @@ module FilePipeline
     # Returns a hash into which all captured data from file operations with the
     # FileOperations::CapturedDataTags::DROPPED_EXIF_DATA has been merged.
     def recovered_metadata
+      return unless changed?
       captured_data_with(FileOperations::CapturedDataTags::DROPPED_EXIF_DATA)
         &.reduce({}) { |recovered, data| recovered.merge data }
     end
