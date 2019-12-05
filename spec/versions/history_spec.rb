@@ -8,36 +8,39 @@ module FilePipeline
       let(:version2) { 'version2.txt' }
 
       let :operation1a do
-        double 'operation', name: 'Op1', options: { x: true },
-          captured_data_tag: :some_data
+        instance_double 'FileOperations::FileOperation',
+                        name: 'Op1', options: { x: true },
+                        captured_data_tag: :some_data
       end
 
       let :operation1b do
-        double 'operation', name: 'Op1', options: { x: false },
-          captured_data_tag: :some_data
+        instance_double 'FileOperations::FileOperation',
+                        name: 'Op1', options: { x: false },
+                        captured_data_tag: :some_data
       end
 
       let :operation2 do
-        double 'operation', name: 'Op2', options: {},
-          captured_data_tag: :no_data
+        instance_double 'FileOperations::FileOperation',
+                        name: 'Op2', options: {},
+                        captured_data_tag: :no_data
       end
 
       let :results1a do
-        double('FileOperations::Results',
-               operation: operation1a,
-               success: true, log: ['warning1'], data: { a: 1, b: 2 })
+        instance_double('FileOperations::Results',
+                        operation: operation1a, success: true,
+                        log: ['warning1'], data: { a: 1, b: 2 })
       end
 
       let :results1b do
-        double('FileOperations::Results',
-               operation: operation1b,
-               success: true, log: ['warning2'], data: { c: 3, d: 4 })
+        instance_double('FileOperations::Results',
+                        operation: operation1b, success: true,
+                        log: ['warning2'], data: { c: 3, d: 4 })
       end
 
       let :results2 do
-        double('FileOperations::Results',
-               operation: operation2,
-               succuess: true, log: ['info1', 'info2'], data: nil)
+        instance_double('FileOperations::Results',
+                        operation: operation2, succuess: true,
+                        log: %w[info1 info2], data: nil)
       end
 
       before { history[version1] = results1a }
@@ -47,12 +50,13 @@ module FilePipeline
           subject(:insert_new) { history[version2] = results2 }
 
           it do
-            expect { insert_new }.to change { history[version2] }
-                                 .from(be_nil).to include results2
+            expect { insert_new }
+              .to change { history[version2] }
+              .from(be_nil).to include results2
           end
 
           it do
-            expect { insert_new }.not_to change { history[version1] }
+            expect { insert_new }.not_to(change { history[version1] })
           end
         end
 
@@ -60,9 +64,10 @@ module FilePipeline
           subject(:insert_again) { history[version1] = results1b }
 
           it do
-            expect { insert_again }.to change { history[version1] }
-                                   .from(contain_exactly(results1a))
-                                   .to contain_exactly(results1a, results1b)
+            expect { insert_again }
+              .to change { history[version1] }
+              .from(contain_exactly(results1a))
+              .to contain_exactly(results1a, results1b)
           end
         end
       end
@@ -90,7 +95,7 @@ module FilePipeline
         before { history[version1] = results1b }
 
         let(:operation) { 'Op1' }
-        
+
         context 'when there is data for the operation' do
           let(:options) { Hash[:x, false] }
 
@@ -144,11 +149,15 @@ module FilePipeline
 
       describe 'empty?' do
         context 'when no modifications have occurred' do
-          it { expect(described_class.new.empty?).to be_truthy }
+          it 'returns true' do
+            expect(described_class.new).to be_empty
+          end
         end
 
         context 'when modifications have occurred' do
-          it { expect(history.empty?).to be_falsey }
+          it 'returns false' do
+            expect(history).not_to be_empty
+          end
         end
       end
 
@@ -160,14 +169,11 @@ module FilePipeline
 
         it do
           expect(history.log)
-            .to contain_exactly [operation1a.name,
-                                 operation1a.options,
+            .to contain_exactly [operation1a.name, operation1a.options,
                                  results1a.log],
-                                [operation1b.name,
-                                 operation1b.options,
+                                [operation1b.name, operation1b.options,
                                  results1b.log],
-                                [operation2.name,
-                                 operation2.options,
+                                [operation2.name, operation2.options,
                                  results2.log]
         end
       end
@@ -185,4 +191,3 @@ module FilePipeline
     end
   end
 end
-

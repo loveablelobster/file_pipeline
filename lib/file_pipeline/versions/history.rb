@@ -5,6 +5,7 @@ module FilePipeline
     # History objects keep track of a VersionedFile instances versions names and
     # any associated logs or data for each version.
     class History
+      # Returns a new instance.
       def initialize
         @entries = {}
       end

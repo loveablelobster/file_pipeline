@@ -75,20 +75,6 @@ module FilePipeline
       @target_suffix = target_suffix
     end
 
-    # Copies the file with path _src_ to <em>/dir/filename</em>.
-    def self.copy(src, dir, filename)
-      dest = FilePipeline.path(dir, filename)
-      FileUtils.cp src, dest
-      dest
-    end
-
-    # Moves the file with path _src_ to <em>/dir/filename</em>.
-    def self.move(src, dir, filename)
-      dest = FilePipeline.path(dir, filename)
-      FileUtils.mv src, dest
-      dest
-    end
-
     # Adds a new version to #history and returns _self_.
     #
     # <tt>version_info</tt> must be a path to an existing file or an array with
@@ -120,7 +106,7 @@ module FilePipeline
     # the file to history, but no FileOperations::Results.
     def clone
       filename = FilePipeline.new_basename + current_extension
-      clone_file = VersionedFile.copy(current, directory, filename)
+      clone_file = Versions.copy(current, directory, filename)
       self << clone_file
     end
 
@@ -159,7 +145,7 @@ module FilePipeline
       yield(self) if block_given?
       filename = overwrite ? replacing_trarget : preserving_taget
       FileUtils.rm original if overwrite
-      @original = VersionedFile.copy(current, original_dir, filename)
+      @original = Versions.copy(current, original_dir, filename)
     ensure
       reset
     end
@@ -244,7 +230,7 @@ module FilePipeline
 
       return file if File.dirname(file) == directory
 
-      VersionedFile.move file, directory, File.basename(file)
+      Versions.move file, directory, File.basename(file)
     end
 
     # Creates the directory containing all version files. Directory name is
