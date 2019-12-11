@@ -12,7 +12,7 @@ module FilePipeline
       #
       # ===== Arguments
       #
-      # * +msg+ - error message for the exception. If none provided, the 
+      # * +msg+ - error message for the exception. If none provided, the
       #   instance will be initialized with the #default_message.
       #
       # ===== Options
@@ -38,7 +38,7 @@ module FilePipeline
 
       private
 
-      # Appends the backtrace of the error that caused the exception to the 
+      # Appends the backtrace of the error that caused the exception to the
       # #default_message.
       def append_backtrace(str)
         return str + "\n" unless original_backtrace
@@ -46,7 +46,7 @@ module FilePipeline
         str + " Backtrace:\n#{original_backtrace}"
       end
 
-      # Appends the message of the error that caused the exception to the 
+      # Appends the message of the error that caused the exception to the
       # #default_message.
       def append_error(str)
         return str unless original_error

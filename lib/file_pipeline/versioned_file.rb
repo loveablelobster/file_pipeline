@@ -198,6 +198,7 @@ module FilePipeline
     # FileOperations::CapturedDataTags::DROPPED_EXIF_DATA has been merged.
     def recovered_metadata
       return unless changed?
+
       captured_data_with(FileOperations::CapturedDataTags::DROPPED_EXIF_DATA)
         &.reduce({}) { |recovered, data| recovered.merge data }
     end

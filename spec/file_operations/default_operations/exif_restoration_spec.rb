@@ -46,10 +46,9 @@ module FilePipeline
 
       it { expect(restored.last).to have_attributes success: be_truthy }
 
-      it do
-        expect(restored.last.data).to include_tags
-      end
-      it { expect(restored.last.log).to include error }
+      it { expect(restored.last).to have_attributes data: include_tags }
+
+      it { expect(restored.last).to have_attributes log: include(error) }
     end
   end
 end

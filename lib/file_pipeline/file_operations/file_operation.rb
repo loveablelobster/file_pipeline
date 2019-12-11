@@ -18,6 +18,9 @@ module FilePipeline
     # that is passed to #run or #operation as <tt>src_file</tt>, the subclass
     # must have a #target_extension method that returns the appropriate
     # extension.
+    #
+    # If the operation is non-modifying, the subclass must redefine the
+    # #modifies? methods to return +false+.
     class FileOperation
       # A Hash; any options used when performing #operation.
       attr_reader :options
@@ -60,6 +63,12 @@ module FilePipeline
       # error, array, or hash).
       def failure(log_data = nil)
         results false, log_data
+      end
+
+      # Returns +true+ if the FIleOperation will create a new version.
+      # _Default:_ +true+.
+      def modifies?
+        true
       end
 
       # Returns the class name (string) of +self+ _without_ the names of the
@@ -133,11 +142,11 @@ module FilePipeline
       # e.g. when exif metadata tags missing in the <tt>src_file</tt> are to
       # be copied over from another file.
       def run(src_file, directory, original = nil)
-        out_file = target directory, extension(src_file)
+        out_file = target directory, extension(src_file) if modifies?
         log_data = operation src_file, out_file, original
         [out_file, success(log_data)]
       rescue StandardError => e
-        FileUtils.rm out_file if File.exist? out_file
+        FileUtils.rm out_file if out_file && File.exist?(out_file)
         [out_file, failure(e)]
       end
 

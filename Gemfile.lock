@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    file_pipeline (0.0.7)
+    file_pipeline (0.0.8)
       multi_exiftool (~> 0.11.0)
       ruby-vips (~> 2.0.16)
 

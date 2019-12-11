@@ -248,8 +248,7 @@ The <tt>#initialize</tt> method _must_ take an +options+ argument (a hash
 with a default value, or a <em>double splat</em>) and _must_ be exposed
 through an <tt>#options</tt> getter method.
 
-The options passed can be any for the file operation to properly configure
-a specific instance of a method.
+The options passed can be any to properly configure an instance of the class.
 
 This requirement is imposed by the 
 {#define_operation}[rdoc-ref:FilePipeline::Pipeline#define_operation] instance
@@ -296,20 +295,26 @@ The three arguments required for implementations of <tt>#run</tt> are:
   succession of modified versions has been created.
 
 The <em>original file</em> will only be used by file operations that require
-it for reference, e.g. to restore file metadata that was compromised by
-other file operations.
+it for reference, e.g. to restore or recover file metadata that was compromised
+by other file operations.
 
 ===== Return value
 
-The method _must_ return the path to the file that was created by the
-operation (perferrably in the _directory_). It _may_ also return a 
-{Results}[rdoc-ref:FilePipeline::FileOperations::Results] object, containing the
-operation itself, a _success_ flag (+true+ or +false+), and any logs or data
-returned by the operation.
+If the operation modifies the file (i.e. creates a new version), the +run+
+method _must_ return the path to the file that was created (perferrably in the
+_directory_). If it does not modify and no results are returned, it _must_
+return +nil+.
+
+The method _may_ return a 
+{Results}[rdoc-ref:FilePipeline::FileOperations::Results] object along with the
+path or +nil+. The results object should contain the operation itself, a
+_success_ flag (+true+ or +false+), and any logs or data returned by the
+operation.
 
 If results are returned with the path to the created file, both values must
 be wrapped in an array, with the path as the first element, the results as
-the second.
+the second. If the operation does not modify and therefore not return a path,
+the first element of the array must be +nil+.
 
 ===== Example
 
@@ -367,15 +372,21 @@ logic to perform the actual file operation, but will call an
 {#operation method}[rdoc-label:label-The+operation+method] that _must_ be
 defined in the subclass unless the subclass overrides the <tt>#run</tt> method.
 
-The <tt>#run</tt> method will generate the new path that is passed to the
-<tt>#operation</tt> method, and to which the latter will write the new
-version of the file. The new file path will need an appropriate file type
-extension. The default behavior is to assume that the extension will be the
-same as for the file that was passed in as the basis from which the new
-version will be created. If the operation will result in a different file
-type, the subclass _should_ define a <tt>#target_extension</tt> method that
-returns the appropriate file extension (see
-{Target file extensions}[rdoc-label:label-Target+file+extensions]).
+If the operation is modifying (creates a new version), the <tt>#run</tt> method
+will generate the new path that is passed to the <tt>#operation</tt> method,
+and to which the latter will write the new version of the file. The new file
+path will need an appropriate file type extension. The default behavior is to
+assume that the extension will be the same as for the file that was passed in as
+the basis from which the new version will be created. If the operation will
+result in a different file type, the subclass _should_ define a
+<tt>#target_extension</tt> method that returns the appropriate file extension
+(see {Target file extensions}[rdoc-label:label-Target+file+extensions]).
+
+Subclasses of FileOperation are by default modifying. If the operation is not
+modifying (does not create a new version of the file), the subclass _must_
+override the <tt>#modiies?</tt> method or override the <tt>#run</tt> method to
+ensure it does not return a file path (see
+{Non-modifying operations}[rdoc-label:label-Non-modifying+operations]).
 
 ==== Initializer
 
@@ -488,6 +499,16 @@ return the appropriate
     # write the new version based on src_file to out_file
 
     return
+  end
+
+==== Non-modifying operations
+
+If the operation will not create a new version, the class _must_ redefine the
+<tt>#modifies?</tt> method to return +false+:
+
+  # non-modiyfing operation
+  def modifies?
+    false
   end
 
 ==== Target file extensions

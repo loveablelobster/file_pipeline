@@ -9,6 +9,10 @@ module FilePipeline
       # Returns an Array of tags to be ignored during comparison. These can
       # be merged with an ExifManipulable including FileOperation's options
       # to skip tags (e.g. the <tt>skip_tags</tt> option in ExifRestoration).
+      #
+      # The included tags relate to the file properties (e.g. filesize,
+      # MIME-type) that will have been altered by any prior operation, such as
+      # file format conversions.
       def self.file_tags
         %w[FileSize FileModifyDate FileAccessDate FileInodeChangeDate
            FilePermissions FileType FileTypeExtension MIMEType]

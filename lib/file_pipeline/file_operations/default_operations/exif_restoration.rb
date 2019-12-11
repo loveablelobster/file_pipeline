@@ -2,9 +2,12 @@
 
 module FilePipeline
   module FileOperations
-    # A FileOperation that compares Exif Metadata in two files and copies tags
-    # missing in one from the other. Used to restore Exif tags that were not
-    # preserved during e.g. a file conversion.
+    # A modifying FileOperation that compares a file's Exif Metadata with that
+    # of a reference file and attempts to copy tags missing in the working file
+    # from the reference file.
+    #
+    # Used to restore Exif tags that were not preserved during e.g. a file
+    # conversion.
     #
     # *Caveat:* if this operation is applied to a file together with
     # ExifRedaction, it should be applied _before_ the latter, to avoid
@@ -20,10 +23,9 @@ module FilePipeline
       #
       # * <tt>skip_tags</tt> - _Exif_ tags to be ignored during restoration.
       #
-      # The ExifManipulable mixin defines a set of _Exif_ tags that will always
-      # be ignored. These are tags relating to the file properties (e.g.
-      # filesize, MIME-type) that will have been altered by any prior operation,
-      # such as file format conversions.
+      # The ExifManipulable mixin defines a set of _Exif_
+      # {tags}[rdoc-ref:FilePipeline::FileOperations::ExifManipulable.file_tags]
+      # that will always be ignored.
       def initialize(**opts)
         defaults = { skip_tags: [] }
         super(opts, defaults)
@@ -38,8 +40,6 @@ module FilePipeline
         CapturedDataTags::DROPPED_EXIF_DATA
       end
 
-      # :args: src_file, out_file
-      #
       # Writes a new version of <tt>src_file</tt> to <tt>out_file</tt> with all
       # writable _Exif_ tags from +original+ restored.
       #

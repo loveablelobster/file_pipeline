@@ -216,7 +216,7 @@ module FilePipeline
       let(:version) do
         a_timestamp_filename & ending_with('.jpg')
       end
-      
+
       it do
         expect { clone }.to change(versioned_file, :versions)
           .from(a_collection_excluding(version))
@@ -366,7 +366,7 @@ module FilePipeline
         versioned_file.metadata(for_version: version)
                       .delete_if { |k, _| k == 'FileAccessDate' }
       end
-      
+
       let :original_exif do
         MultiExiftool.read(src_file1)[0][0]
                      .to_h
@@ -393,17 +393,18 @@ module FilePipeline
 
       context 'when modifications have occurred' do
         before { versioned_file.modify { |src, path| converter.run src, path } }
+
         after { FileUtils.rm_r exampledir1 if File.exist? exampledir1 }
-        
+
         context 'when accessing the current version' do
           let(:version) { :current }
-         
+
           it { expect(file_metadata).to eq final_exif.call }
         end
 
         context 'when accessing the original version' do
           let(:version) { :original }
-          
+
           it { expect(file_metadata).to eq original_exif }
         end
 
