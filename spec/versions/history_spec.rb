@@ -90,7 +90,7 @@ module FilePipeline
       end
 
       describe '#captured_data_for(operation_name, **options)' do
-        subject { history.captured_data_for(operation, options) }
+        subject { history.captured_data_for(operation, **options) }
 
         before { history[version1] = results1b }
 
@@ -109,7 +109,7 @@ module FilePipeline
         end
 
         context 'when no modifications have occurred' do
-          subject { described_class.new.captured_data_for(operation, {}) }
+          subject { described_class.new.captured_data_for(operation, **{}) }
 
           it { is_expected.to be_nil }
         end

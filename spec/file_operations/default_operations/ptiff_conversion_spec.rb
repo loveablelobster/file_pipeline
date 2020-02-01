@@ -19,11 +19,7 @@ module FilePipeline
           .not_to eq(Digest::MD5.file(src_file1))
       end
 
-      it 'converts the file to a multiresolution (pyramid) tiff',
-         pending: 'fragile example; exiftool updates may alter metadata' do
-        expect(Digest::MD5.file(pyramid.first))
-          .to eq(Digest::MD5.file(src_file_ptiff))
-      end
+      it 'converts the file to a multiresolution (pyramid) tiff'
     end
   end
 end

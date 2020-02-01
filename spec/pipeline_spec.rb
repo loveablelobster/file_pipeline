@@ -90,13 +90,7 @@ module FilePipeline
         end
 
         it 'creates a final version that is the same as'\
-           ' spec/support/full_pipeline.tiff',
-           pending: 'fragile example; exiftool updates may alter metadata' do
-          expect { apply }
-            .to change { Digest::MD5.file(vfile1.current) }
-            .from(eq(Digest::MD5.file(src_file1)))
-            .to eq(Digest::MD5.file('spec/support/full_pipeline.tiff'))
-        end
+           ' spec/support/full_pipeline.tiff'
       end
 
       describe '#batch_apply(*versioned_files)' do

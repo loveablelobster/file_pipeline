@@ -85,7 +85,7 @@ module FilePipeline
     def <<(version_info)
       file, info = version_info
       if info&.failure
-        raise Errors::FailedModificationError, info: info, file: original
+        raise Errors::FailedModificationError.new info: info, file: original
       end
 
       version = validate(file)
@@ -229,7 +229,9 @@ module FilePipeline
     def validate(file)
       return current unless file
 
-      raise Errors::MissingVersionFileError, file: file unless File.exist? file
+      unless File.exist? file
+        raise Errors::MissingVersionFileError.new file: file
+      end
 
       return file if File.dirname(file) == directory
 

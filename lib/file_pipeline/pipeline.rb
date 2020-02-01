@@ -88,7 +88,7 @@ module FilePipeline
     #
     def define_operation(file_operation, options = {})
       operation = FilePipeline.load file_operation
-      self << operation.new(options)
+      self << operation.new(**options)
       self
     end
 

@@ -34,7 +34,7 @@ module FilePipeline
       def operation(*args)
         src_file, out_file = args
         image = Vips::Image.new_from_file src_file
-        image.tiffsave(out_file, options)
+        image.tiffsave(out_file, **options)
         # Return lof if any
       end
 

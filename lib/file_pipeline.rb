@@ -23,7 +23,7 @@ module FilePipeline
     return source_directories if source_directories.include? directory_path
 
     no_dir = !File.directory?(directory_path)
-    raise Errors::SourceDirectoryError, dir: directory if no_dir
+    raise Errors::SourceDirectoryError.new dir: directory if no_dir
 
     @src_directories.prepend directory_path
   end
@@ -45,9 +45,10 @@ module FilePipeline
     src_file += '.rb' unless src_file.end_with? '.rb'
     src_path = FilePipeline.source_path src_file
     if src_path.nil?
-      raise Errors::SourceFileError,
-            file: src_file,
-            directories: FilePipeline.source_directories
+      raise Errors::SourceFileError.new(
+        file: src_file,
+        directories: FilePipeline.source_directories
+      )
     end
     require src_path
   end
