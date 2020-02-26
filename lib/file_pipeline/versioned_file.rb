@@ -144,6 +144,8 @@ module FilePipeline
     #   * +true+ - The finalized version will replace the #original.
     def finalize(overwrite: false)
       yield(self) if block_given?
+      return original unless changed?
+
       filename = overwrite ? replacing_trarget : preserving_taget
       FileUtils.rm original if overwrite
       @original = Versions.copy(current, original_dir, filename)
