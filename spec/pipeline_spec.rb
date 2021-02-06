@@ -3,7 +3,9 @@
 require_relative '../lib/file_pipeline/file_operations'\
                  '/default_operations/scale'
 
+# rubocop:disable Metrics/ModuleLength
 module FilePipeline
+  # rubocop:disable Metrics/BlockLength
   RSpec.describe Pipeline do
     include_context 'with variables'
 
@@ -184,4 +186,6 @@ module FilePipeline
       end
     end
   end
+  # rubocop:enable Metrics/BlockLength
 end
+# rubocop:enable Metrics/ModuleLength

@@ -25,9 +25,12 @@ module FilePipeline
       # when the purpose of the class is to convert an image to JPEG), replace
       # `super` with the appropriate extension, e.g. `.jpg`. Otherwise, this
       # method can be safely removed.
+      #
+      # rubocop:disable Lint/UselessMethodDefinition
       def extension(file)
         super
       end
+      # rubocop:enable Lint/UselessMethodDefinition
 
       # required
       # All FileOperation subclasses MUST implement this method, and it MUST

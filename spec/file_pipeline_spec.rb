@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# rubocop:disable Metrics/BlockLength
 RSpec.describe FilePipeline do
   include_context 'with variables'
 
@@ -92,7 +93,7 @@ RSpec.describe FilePipeline do
     context 'when passing a file that exists' do
       subject { described_class.source_path 'ptiff_conversion.rb' }
 
-      it { is_expected.to eq default_ops + '/ptiff_conversion.rb' }
+      it { is_expected.to eq "#{default_ops}/ptiff_conversion.rb" }
     end
 
     context 'when passing a file that exists in the custom directory' do
@@ -100,7 +101,7 @@ RSpec.describe FilePipeline do
 
       before { described_class << test_ops }
 
-      it { is_expected.to eq test_ops + '/test_operation.rb' }
+      it { is_expected.to eq "#{test_ops}/test_operation.rb" }
     end
 
     context 'when passing a file that does not exist' do
@@ -110,3 +111,4 @@ RSpec.describe FilePipeline do
     end
   end
 end
+# rubocop:enable Metrics/BlockLength

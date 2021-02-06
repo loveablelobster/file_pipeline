@@ -24,7 +24,7 @@ module FilePipeline
       end
 
       def self.strip_path(str) # :nodoc:
-        str.sub(%r{ - \/?(\/|[-:.]+|\w+)+\.\w+$}, '')
+        str.sub(%r{ - /?(/|[-:.]+|\w+)+\.\w+$}, '')
       end
 
       # Redacts (deletes) all <tt>tags_to_delete</tt> in <tt>out_file</tt>.

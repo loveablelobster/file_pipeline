@@ -41,9 +41,9 @@ module FilePipeline
       # Appends the backtrace of the error that caused the exception to the
       # #default_message.
       def append_backtrace(str)
-        return str + "\n" unless original_backtrace
+        return "#{str}\n" unless original_backtrace
 
-        str + " Backtrace:\n#{original_backtrace}"
+        "#{str} Backtrace:\n#{original_backtrace}"
       end
 
       # Appends the message of the error that caused the exception to the
@@ -58,7 +58,7 @@ module FilePipeline
 
       # Returns a String with the #message for +self+.
       def default_message
-        if info&.respond_to?(:operation) && info&.respond_to?(:log)
+        if info.respond_to?(:operation) && info.respond_to?(:log)
           msg = "#{info.operation&.name} with options"\
             " #{info.operation&.options} failed on #{@file}."
           append_error msg

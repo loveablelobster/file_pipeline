@@ -41,10 +41,7 @@ module FilePipeline
     # Adds a file operation object #file_operations. The object must implement
     # a _run_ method (see FileOperations::FileOperation#run for details).
     def <<(file_operation_instance)
-      unless file_operation_instance.respond_to? :run
-        raise TypeError, 'File operations must implement a #run method'
-      end
-
+      validate file_operation_instance
       @file_operations << file_operation_instance
     end
 
@@ -105,6 +102,16 @@ module FilePipeline
       versioned_file.modify do |version, directory, original|
         operation.run version, directory, original
       end
+    end
+
+    private
+
+    # Raises TypeError if <tt>file_operation_instance</tt> does not implement a
+    # #run method.
+    def validate(file_operation_instance)
+      return file_operation_instance if file_operation_instance.respond_to? :run
+
+      raise TypeError, 'File operations must implement a #run method'
     end
   end
 end

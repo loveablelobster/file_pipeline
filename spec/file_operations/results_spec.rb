@@ -2,6 +2,7 @@
 
 module FilePipeline
   module FileOperations
+    # rubocop:disable Metrics/BlockLength
     RSpec.describe Results do
       subject(:new_instance) { described_class.new description, true, log_data }
 
@@ -57,5 +58,6 @@ module FilePipeline
         it { expect(new_instance.data).to be_nil }
       end
     end
+    # rubocop:enable Metrics/BlockLength
   end
 end

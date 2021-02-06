@@ -2,6 +2,7 @@
 
 module FilePipeline
   module FileOperations
+    # rubocop:disable Metrics/BlockLength
     RSpec.describe LogDataParser do
       subject(:log_data) { described_class.new args }
 
@@ -99,5 +100,6 @@ module FilePipeline
         it { is_expected.to match_array [[], {}] }
       end
     end
+    # rubocop:enable Metrics/BlockLength
   end
 end

@@ -7,6 +7,7 @@ require_relative '../../../lib/file_pipeline/file_operations'\
 
 module FilePipeline
   module FileOperations
+    # rubocop:disable Metrics/BlockLength
     RSpec.describe ExifRedaction do
       include_context 'with variables'
 
@@ -67,5 +68,6 @@ module FilePipeline
         end
       end
     end
+    # rubocop:enable Metrics/BlockLength
   end
 end

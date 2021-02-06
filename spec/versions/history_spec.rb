@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
+# rubocop:disable Metrics/ModuleLength
 module FilePipeline
   module Versions
+    # rubocop:disable Metrics/BlockLength
     RSpec.describe History do
       let(:history) { described_class.new }
       let(:version1) { 'version1.txt' }
@@ -196,5 +198,7 @@ module FilePipeline
         end
       end
     end
+    # rubocop:enable Metrics/BlockLength
   end
 end
+# rubocop:enable Metrics/ModuleLength

@@ -33,7 +33,7 @@ module FilePipeline
   def self.load(file_operation)
     const = file_operation.split('_').map(&:capitalize).join
     FilePipeline.load_file(file_operation) unless const_defined? const
-    const_get 'FileOperations::' + const
+    const_get "FileOperations::#{const}"
   rescue NameError
     # TODO: implement autogenerating module names from file_operation src path
     const_get const

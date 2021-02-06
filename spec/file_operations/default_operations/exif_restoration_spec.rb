@@ -7,6 +7,7 @@ require_relative '../../../lib/file_pipeline/file_operations'\
 
 module FilePipeline
   module FileOperations
+    # rubocop:disable Metrics/BlockLength
     RSpec.describe ExifRestoration do
       include_context 'with variables'
 
@@ -50,5 +51,6 @@ module FilePipeline
 
       it { expect(restored.last).to have_attributes log: include(error) }
     end
+    # rubocop:enable Metrics/BlockLength
   end
 end

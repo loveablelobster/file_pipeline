@@ -84,10 +84,7 @@ module FilePipeline
     # Will move the file to #directory if it is in another directory.
     def <<(version_info)
       file, info = version_info
-      if info&.failure
-        raise Errors::FailedModificationError.new info: info, file: original
-      end
-
+      failed_modification? info
       version = validate(file)
       @history[version] = info
       self
@@ -146,7 +143,7 @@ module FilePipeline
       yield(self) if block_given?
       return original unless changed?
 
-      filename = overwrite ? replacing_trarget : preserving_taget
+      filename = overwrite ? replacing_target : preserving_target
       FileUtils.rm original if overwrite
       @original = Versions.copy(current, original_dir, filename)
     ensure
@@ -167,10 +164,12 @@ module FilePipeline
     # than exif.
     #++
     def metadata(for_version: :current)
-      if %i[current original].include? for_version
-        file = public_send(for_version)
-      end
-      file ||= for_version
+      file = case for_version
+             when :current, :original
+               public_send for_version
+             else
+               for_version
+             end
       read_exif(file).first
     end
 
@@ -209,15 +208,22 @@ module FilePipeline
 
     private
 
+    # Raises FailedModificationError if +info+ contains a failure.
+    def failed_modification?(info)
+      return unless info&.failure
+
+      raise Errors::FailedModificationError.new info: info, file: original
+    end
+
     # Returns the filename for a target file that will not overwrite the
     # original.
-    def preserving_taget
-      basename + '_' + target_suffix + current_extension
+    def preserving_target
+      "#{basename}_#{target_suffix}#{current_extension}"
     end
 
     # Returns the filename for a target file that will overwrite the
     # original.
-    def replacing_trarget
+    def replacing_target
       basename + current_extension
     end
 
@@ -231,13 +237,11 @@ module FilePipeline
     def validate(file)
       return current unless file
 
-      unless File.exist? file
-        raise Errors::MissingVersionFileError.new file: file
-      end
-
       return file if File.dirname(file) == directory
 
       Versions.move file, directory, File.basename(file)
+    rescue Errno::ENOENT
+      raise Errors::MissingVersionFileError.new file: file
     end
 
     # Creates the directory containing all version files. Directory name is
@@ -245,9 +249,8 @@ module FilePipeline
     #
     # Raises SystemCallError if the directory already exists.
     def workdir
-      subdir = basename + '_versions'
       filedir = File.dirname(original)
-      dirname = File.join filedir, subdir
+      dirname = File.join filedir, "#{basename}_versions"
       FileUtils.mkdir(dirname)
       File.path dirname
     end

@@ -7,7 +7,9 @@ require_relative '../lib/file_pipeline/file_operations'\
 require_relative '../lib/file_pipeline/file_operations'\
                  '/default_operations/exif_restoration'
 
+# rubocop:disable Metrics/ModuleLength
 module FilePipeline
+  # rubocop:disable Metrics/BlockLength
   RSpec.describe VersionedFile do
     include_context 'with variables'
 
@@ -46,7 +48,7 @@ module FilePipeline
 
         before { FileUtils.cp src_file_ptiff, stored }
 
-        let(:stored) { (exampledir1 + '/pyramid.tiff') }
+        let(:stored) { "#{exampledir1}/pyramid.tiff" }
 
         it do
           expect { add_version }.to change(versioned_file, :versions)
@@ -519,4 +521,6 @@ module FilePipeline
       end
     end
   end
+  # rubocop:enable Metrics/BlockLength
 end
+# rubocop:enable Metrics/ModuleLength
