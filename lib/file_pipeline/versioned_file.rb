@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require_relative 'versions/validator'
 module FilePipeline
   # VersionedFile creates a directory where it stores any versions of _file_.
   class VersionedFile
@@ -81,11 +82,10 @@ module FilePipeline
     # <tt>version_info</tt> must be a path to an existing file or an array with
     # the path and optionally a FileOperations::Results instance:
     # <tt>['path/to/file', results_object]</tt>.
-    # Will move the file to #directory if it is in another directory.
+    # Will raise MisplacedVersionFileError if it is in another directory.
     def <<(version_info)
-      file, info = version_info
-      failed_modification? info
-      version = validate(file)
+      version, info = Versions::Validator[version_info, self]
+      version ||= @current
       @history[version] = info
       self
     rescue StandardError => e
@@ -208,13 +208,6 @@ module FilePipeline
 
     private
 
-    # Raises FailedModificationError if +info+ contains a failure.
-    def failed_modification?(info)
-      return unless info&.failure
-
-      raise Errors::FailedModificationError.new info: info, file: original
-    end
-
     # Returns the filename for a target file that will not overwrite the
     # original.
     def preserving_target
@@ -231,17 +224,6 @@ module FilePipeline
     def reset
       FileUtils.rm_r directory, force: true
       history.clear!
-    end
-
-    # Validates if file exists and has been stored in #directory.
-    def validate(file)
-      return current unless file
-
-      return file if File.dirname(file) == directory
-
-      Versions.move file, directory, File.basename(file)
-    rescue Errno::ENOENT
-      raise Errors::MissingVersionFileError.new file: file
     end
 
     # Creates the directory containing all version files. Directory name is

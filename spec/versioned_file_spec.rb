@@ -74,21 +74,11 @@ module FilePipeline
         end
 
         it do
-          expect { add_version }.to change(versioned_file, :versions)
-            .from(a_collection_excluding(version)).to include version
-        end
-
-        it do
-          expect { add_version }.to change(versioned_file, :current)
-            .from('spec/support/example1.jpg').to(version)
-        end
-
-        it 'moves file to the working directory' do
           expect { add_version }
-            .to change { File.exist? 'spec/support/pyramid_copy.tiff' }
-            .from(be_truthy).to(be_falsey)
-            .and change { File.exist? version }
-            .from(be_falsey).to be_truthy
+            .to raise_error Errors::MisplacedVersionFileError,
+                            'File pyramid_copy.tiff was expected in'\
+                            ' spec/support/example1_versions, but was in'\
+                            ' spec/support.'
         end
       end
 
