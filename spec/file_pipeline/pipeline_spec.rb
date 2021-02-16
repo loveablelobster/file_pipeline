@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-require_relative '../lib/file_pipeline/file_operations'\
-                 '/default_operations/scale'
+require 'file_pipeline/file_operations/default_operations/scale'
 
 # rubocop:disable Metrics/ModuleLength
 module FilePipeline

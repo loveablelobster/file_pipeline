@@ -2,10 +2,8 @@
 
 require 'ostruct'
 
-require_relative '../lib/file_pipeline/file_operations'\
-                 '/default_operations/ptiff_conversion'
-require_relative '../lib/file_pipeline/file_operations'\
-                 '/default_operations/exif_restoration'
+require 'file_pipeline/file_operations/default_operations/ptiff_conversion'
+require 'file_pipeline/file_operations/default_operations/exif_restoration'
 
 # rubocop:disable Metrics/ModuleLength
 module FilePipeline

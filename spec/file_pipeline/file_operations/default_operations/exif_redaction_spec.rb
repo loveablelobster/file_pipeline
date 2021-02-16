@@ -2,8 +2,7 @@
 
 require 'digest/md5'
 
-require_relative '../../../lib/file_pipeline/file_operations'\
-                 '/default_operations/exif_redaction'
+require 'file_pipeline/file_operations/default_operations/exif_redaction'
 
 module FilePipeline
   module FileOperations

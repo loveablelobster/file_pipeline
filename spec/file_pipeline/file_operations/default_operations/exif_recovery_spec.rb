@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-require_relative '../../../lib/file_pipeline/file_operations'\
-                 '/default_operations/exif_recovery'
+require 'file_pipeline/file_operations/default_operations/exif_recovery'
 
 module FilePipeline
   module FileOperations

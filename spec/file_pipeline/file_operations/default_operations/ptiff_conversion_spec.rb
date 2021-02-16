@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-require_relative '../../../lib/file_pipeline/file_operations'\
-                 '/default_operations/ptiff_conversion'
+require 'file_pipeline/file_operations/default_operations/ptiff_conversion'
 
 module FilePipeline
   module FileOperations
