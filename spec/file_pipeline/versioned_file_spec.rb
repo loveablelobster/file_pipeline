@@ -9,7 +9,9 @@ require 'file_pipeline/file_operations/default_operations/exif_restoration'
 module FilePipeline
   # rubocop:disable Metrics/BlockLength
   RSpec.describe VersionedFile do
-    include_context 'with variables'
+    include_context 'with directories'
+    include_context 'with files'
+    include_context 'with tags'
 
     let(:converter) { FileOperations::PtiffConversion.new }
     let(:exif) { FileOperations::ExifRestoration.new }

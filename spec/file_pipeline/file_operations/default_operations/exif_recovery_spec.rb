@@ -5,7 +5,9 @@ require 'file_pipeline/file_operations/default_operations/exif_recovery'
 module FilePipeline
   module FileOperations
     RSpec.describe ExifRecovery do
-      include_context 'with variables'
+      include_context 'with directories'
+      include_context 'with files'
+      include_context 'with tags'
 
       subject :recovered do
         described_class.new(skip_tags: %w[JFIFVersion])

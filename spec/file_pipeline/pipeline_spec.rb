@@ -6,7 +6,8 @@ require 'file_pipeline/file_operations/default_operations/scale'
 module FilePipeline
   # rubocop:disable Metrics/BlockLength
   RSpec.describe Pipeline do
-    include_context 'with variables'
+    include_context 'with directories'
+    include_context 'with files'
 
     let(:logo) { 'spec/support/logo.png' }
     let(:pipeline) { described_class.new test_ops }

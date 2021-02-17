@@ -2,7 +2,8 @@
 
 # rubocop:disable Metrics/BlockLength
 RSpec.describe FilePipeline do
-  include_context 'with variables'
+  include_context 'with directories'
+  include_context 'with files'
 
   describe '.<<(directory)' do
     context 'when adding a valid directory' do

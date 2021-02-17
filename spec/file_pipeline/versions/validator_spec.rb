@@ -5,7 +5,8 @@ module FilePipeline
   module Versions
     # rubocop:disable Metrics/BlockLength
     RSpec.describe Validator do
-      include_context 'with variables'
+      include_context 'with directories'
+      include_context 'with files'
 
       let :validator do
         described_class.new version_info, exampledir1, src_file1

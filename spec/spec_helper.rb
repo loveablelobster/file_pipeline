@@ -77,6 +77,6 @@ end
 require 'digest/md5'
 require 'pry-byebug'
 
-require_relative 'support/shared_variables'
+require_relative 'support/shared_contexts'
 require_relative 'support/custom_matchers'
 require_relative '../lib/file_pipeline'

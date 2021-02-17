@@ -5,7 +5,8 @@ require 'file_pipeline/file_operations/default_operations/scale'
 module FilePipeline
   module FileOperations
     RSpec.describe Scale do
-      include_context 'with variables'
+      include_context 'with directories'
+      include_context 'with files'
 
       context 'when scaling by bounds' do
         subject :scale do

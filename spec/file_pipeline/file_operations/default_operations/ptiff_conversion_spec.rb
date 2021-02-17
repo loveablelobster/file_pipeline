@@ -5,7 +5,8 @@ require 'file_pipeline/file_operations/default_operations/ptiff_conversion'
 module FilePipeline
   module FileOperations
     RSpec.describe PtiffConversion do
-      include_context 'with variables'
+      include_context 'with directories'
+      include_context 'with files'
 
       subject :pyramid do
         described_class
