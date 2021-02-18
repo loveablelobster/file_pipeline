@@ -29,4 +29,5 @@ RSpec::Matchers.define :a_timestamp_filename do
 end
 
 RSpec::Matchers.alias_matcher :be_a_timestamp_filename, :a_timestamp_filename
+RSpec::Matchers.alias_matcher :be_a_randomized_filename, :a_randomized_filename
 RSpec::Matchers.alias_matcher :an_array_excluding, :a_collection_excluding

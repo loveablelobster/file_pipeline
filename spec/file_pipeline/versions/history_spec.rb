@@ -5,45 +5,12 @@ module FilePipeline
   module Versions
     # rubocop:disable Metrics/BlockLength
     RSpec.describe History do
+      include_context 'with operations'
+      include_context 'with results'
+
       let(:history) { described_class.new }
       let(:version1) { 'version1.txt' }
       let(:version2) { 'version2.txt' }
-
-      let :operation1a do
-        instance_double 'FileOperations::FileOperation',
-                        name: 'Op1', options: { x: true },
-                        captured_data_tag: :some_data
-      end
-
-      let :operation1b do
-        instance_double 'FileOperations::FileOperation',
-                        name: 'Op1', options: { x: false },
-                        captured_data_tag: :some_data
-      end
-
-      let :operation2 do
-        instance_double 'FileOperations::FileOperation',
-                        name: 'Op2', options: {},
-                        captured_data_tag: :no_data
-      end
-
-      let :results1a do
-        instance_double('FileOperations::Results',
-                        operation: operation1a, success: true,
-                        log: ['warning1'], data: { a: 1, b: 2 })
-      end
-
-      let :results1b do
-        instance_double('FileOperations::Results',
-                        operation: operation1b, success: true,
-                        log: ['warning2'], data: { c: 3, d: 4 })
-      end
-
-      let :results2 do
-        instance_double('FileOperations::Results',
-                        operation: operation2, succuess: true,
-                        log: %w[info1 info2], data: nil)
-      end
 
       before { history[version1] = results1a }
 
@@ -99,13 +66,13 @@ module FilePipeline
         let(:operation) { 'Op1' }
 
         context 'when there is data for the operation' do
-          let(:options) { Hash[:x, false] }
+          let(:options) { { x: false } }
 
           it { is_expected.to contain_exactly results1b.data }
         end
 
         context 'when there is no data for the operation' do
-          let(:options) { Hash[:y, true] }
+          let(:options) { { y: true } }
 
           it { is_expected.to be_empty }
         end
@@ -170,13 +137,10 @@ module FilePipeline
         end
 
         it do
-          expect(history.log)
-            .to contain_exactly [operation1a.name, operation1a.options,
-                                 results1a.log],
-                                [operation1b.name, operation1b.options,
-                                 results1b.log],
-                                [operation2.name, operation2.options,
-                                 results2.log]
+          expect(history.log).to contain_exactly\
+            [operation1a.name, operation1a.options, results1a.log],
+            [operation1b.name, operation1b.options, results1b.log],
+            [operation2.name, operation2.options, results2.log]
         end
       end
 

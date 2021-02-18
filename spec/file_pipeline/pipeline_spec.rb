@@ -8,10 +8,9 @@ module FilePipeline
   RSpec.describe Pipeline do
     include_context 'with directories'
     include_context 'with files'
+    include_context 'with versioned_files'
 
-    let(:logo) { 'spec/support/logo.png' }
     let(:pipeline) { described_class.new test_ops }
-    let(:vfile1) { VersionedFile.new src_file1 }
 
     let :versions1 do
       contain_exactly(end_with('.jpg'),
@@ -69,9 +68,6 @@ module FilePipeline
          'spec/support/example2_versions',
          'spec/support/example3_versions']
       end
-
-      let(:vfile2) { VersionedFile.new src_file2 }
-      let(:vfile3) { VersionedFile.new src_file3 }
 
       before do
         pipeline.define_operation('scale', width: 1280, height: 1280)

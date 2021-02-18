@@ -5,14 +5,14 @@ require 'file_pipeline/file_operations/default_operations/ptiff_conversion'
 module FilePipeline
   module FileOperations
     RSpec.describe PtiffConversion do
-      include_context 'with directories'
-      include_context 'with files'
-
       subject :pyramid do
         described_class
           .new
           .run src_file1, target_dir
       end
+
+      include_context 'with directories'
+      include_context 'with files'
 
       it do
         expect(Digest::MD5.file(pyramid.first))

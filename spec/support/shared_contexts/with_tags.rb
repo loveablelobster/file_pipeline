@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 RSpec.shared_context 'with tags', shared_context: :metadata do
+  let(:tags) { FilePipeline::FileOperations::ExifManipulable.file_tags }
+
   let :non_writable_tags do
     include 'EncodingProcess' => 'Baseline DCT, Huffman coding',
             'ColorComponents' => 3,

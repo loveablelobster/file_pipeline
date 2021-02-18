@@ -8,14 +8,14 @@ module FilePipeline
   module FileOperations
     # rubocop:disable Metrics/BlockLength
     RSpec.describe ExifRestoration do
-      include_context 'with directories'
-      include_context 'with files'
-      include_context 'with tags'
-
       subject :restored do
         described_class.new(skip_tags: %w[JFIFVersion])
                        .run src_file_ptiff, target_dir, src_file1
       end
+
+      include_context 'with directories'
+      include_context 'with files'
+      include_context 'with tags'
 
       let(:error) { 'Warning: [Minor] Unrecognized data in IPTC padding' }
       let(:include_tags) { non_writable_tags }

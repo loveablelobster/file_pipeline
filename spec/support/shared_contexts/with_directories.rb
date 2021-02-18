@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.shared_context 'with directories', shared_context: :metadata do
-  # Directories
   let :default_ops do
     File.expand_path 'lib/file_pipeline/file_operations/default_operations'
   end

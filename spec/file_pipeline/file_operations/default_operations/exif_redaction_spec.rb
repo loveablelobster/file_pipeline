@@ -8,13 +8,13 @@ module FilePipeline
   module FileOperations
     # rubocop:disable Metrics/BlockLength
     RSpec.describe ExifRedaction do
-      include_context 'with directories'
-      include_context 'with files'
-
       subject :redacted do
         described_class.new(redact_tags: tags)
                        .run src_file1, target_dir
       end
+
+      include_context 'with directories'
+      include_context 'with files'
 
       let(:tags) { %w[Make Model Lens LensInfo CreatorTool Software] }
       let(:src_exif) { MultiExiftool.read(src_file1)[0][0] }

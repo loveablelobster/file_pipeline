@@ -2,20 +2,14 @@
 
 require 'ostruct'
 
-require 'file_pipeline/file_operations/default_operations/ptiff_conversion'
-require 'file_pipeline/file_operations/default_operations/exif_restoration'
-
 # rubocop:disable Metrics/ModuleLength
 module FilePipeline
   # rubocop:disable Metrics/BlockLength
   RSpec.describe VersionedFile do
     include_context 'with directories'
     include_context 'with files'
+    include_context 'with operations'
     include_context 'with tags'
-
-    let(:converter) { FileOperations::PtiffConversion.new }
-    let(:exif) { FileOperations::ExifRestoration.new }
-    let(:tags) { FileOperations::ExifManipulable.file_tags }
 
     let :versioned_file do
       described_class.new 'spec/support/example1.jpg',
