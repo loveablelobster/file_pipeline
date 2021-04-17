@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name = 'file_pipeline'
-  s.version = '0.1.1'
+  s.version = '0.1.2'
   s.summary = 'Nondestructive file processing with a defined batch'
   s.author = 'Martin Stein'
   s.files = Dir['{lib}/**/*.rb', 'bin/*', 'LICENSE', '*.rdoc']
@@ -14,5 +14,5 @@ Gem::Specification.new do |s|
                   ' files.'
   s.required_ruby_version = '>= 3.0'
   s.add_runtime_dependency('multi_exiftool', '~> 0.16.0')
-  s.add_runtime_dependency('ruby-vips', '~> 2.0.17')
+  s.add_runtime_dependency('ruby-vips', '~> 2.1')
 end
